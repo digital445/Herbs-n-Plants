@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace PlantsAPI.Controllers
+namespace Services.PlantsAPI.Controllers
 {
 	[ApiController]
 	[Route("[controller]")]

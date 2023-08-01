@@ -1,4 +1,4 @@
-namespace PlantsAPI
+namespace Services.PlantsAPI
 {
 	public class WeatherForecast
 	{
