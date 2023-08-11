@@ -1,10 +1,18 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Services.PlantsAPI;
 using Services.PlantsAPI.DbContexts;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
+builder.Services.AddSingleton(mapper);
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+
 // Add services to the container.
 
 builder.Services.AddControllers();
