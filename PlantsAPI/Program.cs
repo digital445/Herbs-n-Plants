@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Services.PlantsAPI;
 using Services.PlantsAPI.DbContexts;
+using Services.PlantsAPI.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,7 @@ IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-
+builder.Services.AddScoped<IPlantsRepository, PlantsRepository>();
 
 // Add services to the container.
 
