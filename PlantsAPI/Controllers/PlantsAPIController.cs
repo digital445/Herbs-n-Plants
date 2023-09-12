@@ -1,0 +1,110 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Services.PlantsAPI.Models.Dto;
+using Services.PlantsAPI.Repository;
+
+namespace Services.PlantsAPI.Controllers
+{
+	[Route("api/plants")]
+	[ApiController]
+	public class PlantsAPIController : ControllerBase
+	{
+		private ResponseDto _response;
+		private IPlantsRepository _plantsRepository;
+
+		public PlantsAPIController(IPlantsRepository plantsRepository)
+		{
+			_response = new ResponseDto();
+			_plantsRepository = plantsRepository;
+		}
+
+		[HttpGet]
+		public async Task<object> GetAll()
+		{
+			try
+			{
+				IEnumerable<PlantDto> plants = await _plantsRepository.GetAll();
+				_response.Result = plants;
+			}
+			catch (Exception ex)
+			{
+				_response.IsSuccess = false;
+				_response.ErrorMessages = new List<string> { ex.Message };
+			}
+			return _response;
+		}
+
+		[HttpGet]
+		[Route("{id}")]
+		public async Task<object> Get(int id)
+		{
+			try
+			{
+				PlantDto? plant = await _plantsRepository.GetPlantById(id);
+				_response.Result = plant;
+			}
+			catch (Exception ex)
+			{
+				_response.IsSuccess = false;
+				_response.ErrorMessages = new List<string> { ex.Message };
+			}
+			return _response;
+		}
+
+		[HttpPost]
+		[Route("filter")]
+		public async Task<object> GetFiltered([FromBody] PlantDto filter)
+		{
+			try
+			{
+				IEnumerable<PlantDto> plants = await _plantsRepository.GetFiltered(filter);
+				_response.Result = plants;
+			}
+			catch (Exception ex)
+			{
+				_response.IsSuccess = false;
+				_response.ErrorMessages = new List<string> { ex.Message };
+			}
+			return _response;
+		}
+
+
+		[HttpPost]
+		[HttpPut]
+		public async Task<object> CreateUpdate([FromBody] PlantDto plant)
+		{
+			try
+			{
+				PlantDto resultPlant = await _plantsRepository.CreateUpdatePlant(plant);
+				_response.Result = resultPlant;
+			}
+			catch (Exception ex)
+			{
+				_response.IsSuccess = false;
+				_response.ErrorMessages = new List<string> { ex.Message };
+				if (ex.InnerException != null)
+				{
+					_response.ErrorMessages.Add(ex.InnerException.Message);
+				}
+			}
+			return _response;
+		}
+
+		[HttpDelete]
+		[Route("{id}")]
+		public async Task<object> Delete(int id)
+		{
+			try
+			{
+				bool IsSuccess = await _plantsRepository.DeletePlant(id);
+				_response.Result = IsSuccess;
+			}
+			catch (Exception ex)
+			{
+				_response.IsSuccess = false;
+				_response.ErrorMessages = new List<string> { ex.Message };
+			}
+			return _response;
+		}
+	}
+}
