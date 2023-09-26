@@ -3,13 +3,13 @@
 	public class PlantDto
 	{
 		public int PlantId { get; set; } = -1;
-		public List<PlantNameDto>? Names { get; set; }
+		public List<PlantNameDto>? Names { get; set; } = new();
 		/// <summary>
 		/// the code of flower's color
 		/// </summary>
 		public int FlowerColorCode { get; set; } = -1;
 		public bool? Poisonous { get; set; }
-        public bool? ForHerbalTea { get; set; }
+		public bool? ForHerbalTea { get; set; }
 		/// <summary>
 		/// picking flowers is prohibited by law
 		/// </summary>

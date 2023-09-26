@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.PlantsAPI.Models.Dto;
 using Services.PlantsAPI.Repository;
@@ -18,6 +18,7 @@ namespace Services.PlantsAPI.Controllers
 			_plantsRepository = plantsRepository;
 		}
 
+		[Authorize]
 		[HttpGet]
 		public async Task<object> GetAll()
 		{
@@ -34,6 +35,25 @@ namespace Services.PlantsAPI.Controllers
 			return _response;
 		}
 
+		[Authorize]
+		[HttpGet]
+		[Route("pages")]
+		public async Task<object> GetPage([FromQuery] int page, [FromQuery] int pageSize)
+		{
+			try
+			{
+				IEnumerable<PlantDto> plants = await _plantsRepository.GetPage(page, pageSize);
+				_response.Result = plants;
+			}
+			catch (Exception ex)
+			{
+				_response.IsSuccess = false;
+				_response.ErrorMessages = new List<string> { ex.Message };
+			}
+			return _response;
+		}
+
+		[Authorize]
 		[HttpGet]
 		[Route("{id}")]
 		public async Task<object> Get(int id)
@@ -51,6 +71,7 @@ namespace Services.PlantsAPI.Controllers
 			return _response;
 		}
 
+		[Authorize]
 		[HttpPost]
 		[Route("filter")]
 		public async Task<object> GetFiltered([FromBody] PlantDto filter)
@@ -68,7 +89,7 @@ namespace Services.PlantsAPI.Controllers
 			return _response;
 		}
 
-
+		[Authorize(Roles = "Admin,Contributor")]
 		[HttpPost]
 		[HttpPut]
 		public async Task<object> CreateUpdate([FromBody] PlantDto plant)
@@ -90,6 +111,7 @@ namespace Services.PlantsAPI.Controllers
 			return _response;
 		}
 
+		[Authorize(Roles = "Admin,Contributor")]
 		[HttpDelete]
 		[Route("{id}")]
 		public async Task<object> Delete(int id)

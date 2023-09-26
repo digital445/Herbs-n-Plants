@@ -5,7 +5,7 @@
 		/// <summary>
 		/// Type of View represented on the Image
 		/// </summary>
-		public enum ViewType 
+		public enum ViewType
 		{
 			GeneralView,
 			Flower,

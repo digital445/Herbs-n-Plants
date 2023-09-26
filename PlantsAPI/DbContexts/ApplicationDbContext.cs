@@ -1,16 +1,15 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using Services.PlantsAPI.Models;
-using System.Xml.Linq;
 
 namespace Services.PlantsAPI.DbContexts
 {
 	public class ApplicationDbContext : DbContext
 	{
-        public DbSet<Plant> Plants{ get; set; }
-        public DbSet<PlantName> PlantNames{ get; set; }
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
+		public DbSet<Plant> Plants { get; set; }
+		public DbSet<PlantName> PlantNames { get; set; }
+		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+		{
 			//!!!debug
 			//Database.EnsureDeleted();
 			//Database.EnsureCreated();
@@ -56,11 +55,11 @@ namespace Services.PlantsAPI.DbContexts
 					 Name = "Boretskyyyyy"
 				 },
 				 new PlantName()
-				{
-					PlantNameId = 3,
-					PlantId = 2,
-					Name = "Dushitsa"
-				});
+				 {
+					 PlantNameId = 3,
+					 PlantId = 2,
+					 Name = "Dushitsa"
+				 });
 		}
 
 	}

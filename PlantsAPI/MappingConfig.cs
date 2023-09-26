@@ -14,6 +14,8 @@ namespace Services.PlantsAPI
 				cfg.CreateMap<Plant, PlantDto>();
 				cfg.CreateMap<PlantNameDto, PlantName>();
 				cfg.CreateMap<PlantName, PlantNameDto>();
+				cfg.CreateMap<ImageLinkDto, ImageLink>();
+				cfg.CreateMap<ImageLink, ImageLinkDto>();
 			});
 			return mappingConfig;
 		}
