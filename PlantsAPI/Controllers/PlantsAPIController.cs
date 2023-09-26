@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Services.PlantsAPI.Models.Dto;
 using Services.PlantsAPI.Repository;
+using System.Runtime.InteropServices;
 
 namespace Services.PlantsAPI.Controllers
 {
@@ -18,7 +19,6 @@ namespace Services.PlantsAPI.Controllers
 			_plantsRepository = plantsRepository;
 		}
 
-		[Authorize]
 		[HttpGet]
 		public async Task<object> GetAll()
 		{
@@ -35,7 +35,6 @@ namespace Services.PlantsAPI.Controllers
 			return _response;
 		}
 
-		[Authorize]
 		[HttpGet]
 		[Route("pages")]
 		public async Task<object> GetPage([FromQuery] int page, [FromQuery] int pageSize)
@@ -53,7 +52,6 @@ namespace Services.PlantsAPI.Controllers
 			return _response;
 		}
 
-		[Authorize]
 		[HttpGet]
 		[Route("{id}")]
 		public async Task<object> Get(int id)
@@ -71,13 +69,24 @@ namespace Services.PlantsAPI.Controllers
 			return _response;
 		}
 
-		[Authorize]
-		[HttpPost]
+		[HttpGet]
 		[Route("filter")]
-		public async Task<object> GetFiltered([FromBody] PlantDto filter)
+		public async Task<object> GetFiltered(string? name = null, int flowerColorCode = -1, bool? poisonous = null, bool? forHerbalTea = null, bool? pickingProhibited = null)
 		{
 			try
 			{
+				PlantDto filter = new PlantDto
+				{
+					Names = new List<PlantNameDto> { 
+						new PlantNameDto { 
+							Name = name
+						} 
+					},
+					FlowerColorCode = flowerColorCode,
+					Poisonous = poisonous,
+					ForHerbalTea = forHerbalTea,
+					PickingProhibited = pickingProhibited
+				};
 				IEnumerable<PlantDto> plants = await _plantsRepository.GetFiltered(filter);
 				_response.Result = plants;
 			}
@@ -111,7 +120,7 @@ namespace Services.PlantsAPI.Controllers
 			return _response;
 		}
 
-		[Authorize(Roles = "Admin,Contributor")]
+		[Authorize(Roles = "Admin")]
 		[HttpDelete]
 		[Route("{id}")]
 		public async Task<object> Delete(int id)

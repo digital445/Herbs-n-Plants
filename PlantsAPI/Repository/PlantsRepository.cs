@@ -105,7 +105,7 @@ namespace Services.PlantsAPI.Repository
 				{
 					var plantIds = _db.PlantNames
 						.Where(pn => EF.Functions.ILike(pn.Name, $"%{nameToFind}%"))
-						.Select(pn => pn.PlantId); //???добавить toList при наличии проблем
+						.Select(pn => pn.PlantId);
 
 					filteredPlants = filteredPlants
 						.Where(pl => plantIds.Contains(pl.PlantId));
@@ -118,38 +118,39 @@ namespace Services.PlantsAPI.Repository
 					(conditions.ForHerbalTea == null || pl.ForHerbalTea == conditions.ForHerbalTea) &&
 					(conditions.PickingProhibited == null || pl.PickingProhibited == conditions.PickingProhibited);
 				filteredPlants = filteredPlants
-					.Where(basicFilterExpression)
-					.Include(pl => pl.Names)
-					.Include(pl => pl.ImageLinks);
+					.Where(basicFilterExpression);
 			}
-			List<Plant> plantList = await filteredPlants.ToListAsync();
+			List<Plant> plantList = await filteredPlants
+					.Include(pl => pl.Names)
+					.Include(pl => pl.ImageLinks)
+					.ToListAsync();
 			return _mapper.Map<List<PlantDto>>(plantList);
 		}
 
 
 
-		public async Task<IEnumerable<PlantDto>> GetFiltered2(PlantDto? conditions)
-		{
-			Expression<Func<Plant, bool>> basicFilterExpression = pl =>
-					conditions == null ||
-					((conditions.FlowerColorCode == -1 || pl.FlowerColorCode == conditions.FlowerColorCode) &&
-					(conditions.Poisonous == null || pl.Poisonous == conditions.Poisonous) &&
-					(conditions.ForHerbalTea == null || pl.ForHerbalTea == conditions.ForHerbalTea) &&
-					(conditions.PickingProhibited == null || pl.PickingProhibited == conditions.PickingProhibited));
+		//public async Task<IEnumerable<PlantDto>> GetFiltered2(PlantDto? conditions)
+		//{
+		//	Expression<Func<Plant, bool>> basicFilterExpression = pl =>
+		//			conditions == null ||
+		//			((conditions.FlowerColorCode == -1 || pl.FlowerColorCode == conditions.FlowerColorCode) &&
+		//			(conditions.Poisonous == null || pl.Poisonous == conditions.Poisonous) &&
+		//			(conditions.ForHerbalTea == null || pl.ForHerbalTea == conditions.ForHerbalTea) &&
+		//			(conditions.PickingProhibited == null || pl.PickingProhibited == conditions.PickingProhibited));
 
-			string? nameToFind = conditions?.Names?.FirstOrDefault()?.Name;
-			Expression<Func<Plant, bool>> nameFilterExpression = pl =>
-					string.IsNullOrWhiteSpace(nameToFind) ||
-					pl.Names!.Any(pn => EF.Functions.ILike(pn.Name, $"%{nameToFind}%")); //case insensitive partial search 
+		//	string? nameToFind = conditions?.Names?.FirstOrDefault()?.Name;
+		//	Expression<Func<Plant, bool>> nameFilterExpression = pl =>
+		//			string.IsNullOrWhiteSpace(nameToFind) ||
+		//			pl.Names!.Any(pn => EF.Functions.ILike(pn.Name, $"%{nameToFind}%")); //case insensitive partial search 
 
-			var filteredPlants = _db.Plants
-				.Where(basicFilterExpression)
-				.Include(pl => pl.Names)
-				.Where(nameFilterExpression)
-				.Include(pl => pl.ImageLinks);
-			List<Plant> plantList = await filteredPlants.ToListAsync();
-			return _mapper.Map<List<PlantDto>>(plantList);
-		}
+		//	var filteredPlants = _db.Plants
+		//		.Where(basicFilterExpression)
+		//		.Include(pl => pl.Names)
+		//		.Where(nameFilterExpression)
+		//		.Include(pl => pl.ImageLinks);
+		//	List<Plant> plantList = await filteredPlants.ToListAsync();
+		//	return _mapper.Map<List<PlantDto>>(plantList);
+		//}
 
 		public async Task<IEnumerable<PlantDto>> GetPage(int page, int pageSize)
 		{

@@ -7,7 +7,7 @@
 		/// <summary>
 		/// the code of flower's color
 		/// </summary>
-		public int FlowerColorCode { get; set; } = -1;
+		public int FlowerColorCode { get; set; }
 		public bool? Poisonous { get; set; }
 		public bool? ForHerbalTea { get; set; }
 		/// <summary>
