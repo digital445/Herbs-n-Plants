@@ -32,7 +32,7 @@ builder.Services.AddAuthorization(options =>
 	options.AddPolicy("ApiScope", policy =>
 	{
 		policy.RequireAuthenticatedUser();
-		policy.RequireClaim("scope", "FullAccess");
+		policy.RequireClaim("scope", "ApiAccess");
 	});
 });
 
