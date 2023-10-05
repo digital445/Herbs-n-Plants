@@ -43,10 +43,10 @@ namespace Services.Identity
 					ClientSecrets = {new Secret("secret".Sha256())},
 					AllowedGrantTypes = GrantTypes.Code, //The Authorization Code grant type is used by confidential and public clients
                                                          //to exchange an authorization code for an access token.
-                    //RedirectUris = {"https://localhost:7271/signin-oidc"}, //URL for successful login
+                    RedirectUris = {"https://localhost:7174/signin-oidc"}, //URL for successful login
                                                                            //Parent address is taken from Mango.Web\Properties\launchSettings.json  https section
-                    //PostLogoutRedirectUris = {"https://localhost:7271/signout-callback-oidc"}, //URL  for successful logout
-					RequirePkce = false,
+                    PostLogoutRedirectUris = {"https://localhost:7174/signout-callback-oidc"}, //URL  for successful logout
+					RequirePkce = true,
                     AllowedScopes = new List<string>
 					{
 						IdentityServerConstants.StandardScopes.OpenId,
