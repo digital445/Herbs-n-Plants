@@ -17,10 +17,16 @@
     <h2>Properties</h2>
 
     <dl>
-        @foreach (var prop in (await HttpContext.AuthenticateAsync()).Properties.Items)
-        {
-            <dt>@prop.Key</dt>
-            <dd>@prop.Value</dd>
+        @{
+            var items = (await HttpContext.AuthenticateAsync()).Properties?.Items;
+            if (items != null)
+            {
+                foreach (var prop in items)
+                {
+                    <dt>@prop.Key</dt>
+                    <dd>@prop.Value</dd>
+                }                
+            }
         }
     </dl>
 }
