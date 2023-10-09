@@ -99,7 +99,7 @@ namespace Services.PlantsAPI.Repository
 
 			if (conditions != null)
 			{
-				//applying filter by name
+				//applying the name filter
 				string? nameToFind = conditions?.Names?.FirstOrDefault()?.Name;
 				if (!string.IsNullOrWhiteSpace(nameToFind)) //if there are a name to look for
 				{
@@ -111,7 +111,7 @@ namespace Services.PlantsAPI.Repository
 						.Where(pl => plantIds.Contains(pl.PlantId));
 				}
 
-				//applying rest filters
+				//applying the remaining filters
 				Expression<Func<Plant, bool>> basicFilterExpression = pl =>
 					(conditions!.FlowerColorCode == -1 || pl.FlowerColorCode == conditions.FlowerColorCode) &&
 					(conditions.Poisonous == null || pl.Poisonous == conditions.Poisonous) &&

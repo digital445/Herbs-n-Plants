@@ -71,22 +71,22 @@ namespace Services.PlantsAPI.Controllers
 
 		[HttpGet]
 		[Route("filter")]
-		public async Task<object> GetFiltered(string? name = null, int flowerColorCode = -1, bool? poisonous = null, bool? forHerbalTea = null, bool? pickingProhibited = null)
+		public async Task<object> GetFiltered([FromQuery] PlantDto filter) //public async Task<object> GetFiltered(string? name = null, int flowerColorCode = -1, bool? poisonous = null, bool? forHerbalTea = null, bool? pickingProhibited = null)
 		{
 			try
 			{
-				PlantDto filter = new PlantDto
-				{
-					Names = new List<PlantNameDto> { 
-						new PlantNameDto { 
-							Name = name
-						} 
-					},
-					FlowerColorCode = flowerColorCode,
-					Poisonous = poisonous,
-					ForHerbalTea = forHerbalTea,
-					PickingProhibited = pickingProhibited
-				};
+				//PlantDto filter = new PlantDto
+				//{
+				//	Names = new List<PlantNameDto> { 
+				//		new PlantNameDto { 
+				//			Name = name
+				//		} 
+				//	},
+				//	FlowerColorCode = flowerColorCode,
+				//	Poisonous = poisonous,
+				//	ForHerbalTea = forHerbalTea,
+				//	PickingProhibited = pickingProhibited
+				//};
 				IEnumerable<PlantDto> plants = await _plantsRepository.GetFiltered(filter);
 				_response.Result = plants;
 			}

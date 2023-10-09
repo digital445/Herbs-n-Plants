@@ -1,3 +1,6 @@
+using Plants;
+using Plants.Services;
+using Plants.Services.IServices;
 using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +28,10 @@ builder.Services.AddAuthentication(options =>
 		options.Scope.Add("ApiAccess");
 		options.SaveTokens = true;
 	});
+
+builder.Services.AddHttpClient<IPlantsService, PlantsService>();
+StaticDetails.PlantsAPIBaseUrl = builder.Configuration["ServiceUrls:PlantsAPI"];
+builder.Services.AddScoped<IPlantsService, PlantsService>();
 
 var app = builder.Build();
 

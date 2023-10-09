@@ -73,6 +73,12 @@ namespace Plants.Services
             properties.RemoveAll(pi => pi.GetCustomAttribute(typeof(SkipFilteringAttribute)) != null); //skip properties marked with SkipFilter attribute
             properties.ForEach(pi => query.Add(pi.Name, pi.GetValue(plantDto)?.ToString()));
 
+            string? nameToFind = plantDto.Names?.FirstOrDefault()?.Name;
+            if (!string.IsNullOrEmpty(nameToFind))
+            {
+                query.Add("Names[0].Name", nameToFind);
+            }            
+
             uriBuilder.Query = query.ToString();
             string finalUrl = uriBuilder.ToString();
 
@@ -93,7 +99,5 @@ namespace Plants.Services
                 AccessToken = token
             });
         }
-
-
     }
 }

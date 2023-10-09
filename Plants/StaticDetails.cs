@@ -2,7 +2,7 @@
 {
     public static class StaticDetails
     {
-        public static string PlantsAPIBaseUrl { get; set; } = "";
+        public static string? PlantsAPIBaseUrl { get; set; }
         public enum ApiType
         {
             GET,
