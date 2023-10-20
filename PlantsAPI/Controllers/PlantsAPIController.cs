@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Services.PlantsAPI.Models.Dto;
 using Services.PlantsAPI.Repository;
-using System.Runtime.InteropServices;
 
 namespace Services.PlantsAPI.Controllers
 {
@@ -19,30 +18,15 @@ namespace Services.PlantsAPI.Controllers
 			_plantsRepository = plantsRepository;
 		}
 
-		[HttpGet]
-		public async Task<object> GetAll()
-		{
-			try
-			{
-				IEnumerable<PlantDto> plants = await _plantsRepository.GetAll();
-				_response.Result = plants;
-			}
-			catch (Exception ex)
-			{
-				_response.IsSuccess = false;
-				_response.ErrorMessages = new List<string> { ex.Message };
-			}
-			return _response;
-		}
 
 		[HttpGet]
-		[Route("pages")]
 		public async Task<object> GetPage([FromQuery] int page, [FromQuery] int pageSize)
 		{
 			try
 			{
-				IEnumerable<PlantDto> plants = await _plantsRepository.GetPage(page, pageSize);
-				_response.Result = plants;
+				var result = await _plantsRepository.GetPage(page, pageSize);
+				_response.Result = result.Item1;
+				_response.TotalCount = result.Item2;
 			}
 			catch (Exception ex)
 			{
@@ -54,7 +38,7 @@ namespace Services.PlantsAPI.Controllers
 
 		[HttpGet]
 		[Route("{id}")]
-		public async Task<object> Get(int id)
+		public async Task<object> GetPlantById(int id)
 		{
 			try
 			{
@@ -71,24 +55,13 @@ namespace Services.PlantsAPI.Controllers
 
 		[HttpGet]
 		[Route("filter")]
-		public async Task<object> GetFiltered([FromQuery] PlantDto filter) //public async Task<object> GetFiltered(string? name = null, int flowerColorCode = -1, bool? poisonous = null, bool? forHerbalTea = null, bool? pickingProhibited = null)
+		public async Task<object> GetFilteredPage([FromQuery] FilterDto filter, [FromQuery] int page, [FromQuery] int pageSize)
 		{
 			try
 			{
-				//PlantDto filter = new PlantDto
-				//{
-				//	Names = new List<PlantNameDto> { 
-				//		new PlantNameDto { 
-				//			Name = name
-				//		} 
-				//	},
-				//	FlowerColorCode = flowerColorCode,
-				//	Poisonous = poisonous,
-				//	ForHerbalTea = forHerbalTea,
-				//	PickingProhibited = pickingProhibited
-				//};
-				IEnumerable<PlantDto> plants = await _plantsRepository.GetFiltered(filter);
-				_response.Result = plants;
+				var result = await _plantsRepository.GetFilteredPage(filter, page, pageSize);
+				_response.Result = result.Item1;
+				_response.TotalCount = result.Item2;
 			}
 			catch (Exception ex)
 			{

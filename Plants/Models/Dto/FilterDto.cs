@@ -1,9 +1,17 @@
 ﻿namespace Plants.Models.Dto
 {
-	public class PlantDto
+	public class FilterDto
 	{
-		public int PlantId { get; set; } = -1;
-        public List<PlantNameDto>? Names { get; set; }
+		public FilterDto()
+		{
+			Name = "";
+			FlowerColorCode = -1;
+			Poisonous = null;
+			ForHerbalTea = null;
+			PickingProhibited = null;
+		}
+
+		public string Name { get; set; }
 		/// <summary>
 		/// the code of flower's color
 		/// </summary>
@@ -14,6 +22,5 @@
 		/// picking flowers is prohibited by law
 		/// </summary>
 		public bool? PickingProhibited { get; set; }
-        public List<ImageLinkDto>? ImageLinks { get; set; } //Links to Images representing this type of Plant
 	}
 }

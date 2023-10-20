@@ -43,16 +43,6 @@ namespace Plants.Services
             });
         }
 
-        public async Task<T?> GetAllAsync<T>(string token)
-        {
-            return await SendAsync<T>(new ApiRequest
-            {
-                ApiType = ApiType.GET,
-                Url = PlantsAPIBaseUrl + "/api/plants",
-                AccessToken = token
-            });
-        }
-
         public async Task<T?> GetAsync<T>(int id, string token)
         {
             return await SendAsync<T>(new ApiRequest
@@ -63,21 +53,16 @@ namespace Plants.Services
             });
         }
 
-        public async Task<T?> GetFilteredAsync<T>(PlantDto plantDto, string token)
+        public async Task<T?> GetFilteredAsync<T>(FilterDto filter, int page, int pageSize, string token)
         {
-            //construct URL from plantDto properties to pass them in URL as query string
+            //construct URL from plantDto properties to pass them into URL as a query string
             var uriBuilder = new UriBuilder(PlantsAPIBaseUrl + "/api/plants/filter");
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            query.Add("page", page.ToString());
+            query.Add("pageSize", pageSize.ToString());
 
-            List<PropertyInfo> properties = plantDto.GetType().GetProperties().ToList();
-            properties.RemoveAll(pi => pi.GetCustomAttribute(typeof(SkipFilteringAttribute)) != null); //skip properties marked with SkipFilter attribute
-            properties.ForEach(pi => query.Add(pi.Name, pi.GetValue(plantDto)?.ToString()));
-
-            string? nameToFind = plantDto.Names?.FirstOrDefault()?.Name;
-            if (!string.IsNullOrEmpty(nameToFind))
-            {
-                query.Add("Names[0].Name", nameToFind);
-            }            
+            List<PropertyInfo> properties = filter.GetType().GetProperties().ToList();
+            properties.ForEach(pi => query.Add(pi.Name, pi.GetValue(filter)?.ToString()));
 
             uriBuilder.Query = query.ToString();
             string finalUrl = uriBuilder.ToString();

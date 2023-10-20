@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Services.PlantsAPI.DbContexts;
 using Services.PlantsAPI.Models;
 using Services.PlantsAPI.Models.Dto;
+using System.Drawing;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 
 namespace Services.PlantsAPI.Repository
 {
@@ -93,67 +95,37 @@ namespace Services.PlantsAPI.Repository
 			return _mapper.Map<PlantDto>(plant);
 		}
 
-		public async Task<IEnumerable<PlantDto>> GetFiltered(PlantDto? conditions)
+		public async Task<(IEnumerable<PlantDto>, int)> GetFilteredPage(FilterDto? filter, int page = 1, int pageSize = int.MaxValue)
 		{
-			IQueryable<Plant> filteredPlants = _db.Plants;
+			IQueryable<Plant> filteredPlants = _db.Plants.Include(pl => pl.Names);
 
-			if (conditions != null)
+			if (filter != null)
 			{
-				//applying the name filter
-				string? nameToFind = conditions?.Names?.FirstOrDefault()?.Name;
-				if (!string.IsNullOrWhiteSpace(nameToFind)) //if there are a name to look for
-				{
-					var plantIds = _db.PlantNames
-						.Where(pn => EF.Functions.ILike(pn.Name, $"%{nameToFind}%"))
-						.Select(pn => pn.PlantId);
 
-					filteredPlants = filteredPlants
-						.Where(pl => plantIds.Contains(pl.PlantId));
-				}
+				Expression<Func<Plant, bool>> filterExpression = pl =>
+					(string.IsNullOrWhiteSpace(filter.Name) || pl.Names.Any(pn => EF.Functions.ILike(pn.Name, $"%{filter.Name}%"))) &&
+					(filter.FlowerColorCode == -1 || pl.FlowerColorCode == filter.FlowerColorCode) &&
+					(filter.Poisonous == null || pl.Poisonous == filter.Poisonous) &&
+					(filter.ForHerbalTea == null || pl.ForHerbalTea == filter.ForHerbalTea) &&
+					(filter.PickingProhibited == null || pl.PickingProhibited == filter.PickingProhibited);
 
-				//applying the remaining filters
-				Expression<Func<Plant, bool>> basicFilterExpression = pl =>
-					(conditions!.FlowerColorCode == -1 || pl.FlowerColorCode == conditions.FlowerColorCode) &&
-					(conditions.Poisonous == null || pl.Poisonous == conditions.Poisonous) &&
-					(conditions.ForHerbalTea == null || pl.ForHerbalTea == conditions.ForHerbalTea) &&
-					(conditions.PickingProhibited == null || pl.PickingProhibited == conditions.PickingProhibited);
-				filteredPlants = filteredPlants
-					.Where(basicFilterExpression);
+				filteredPlants = filteredPlants.Where(filterExpression);
 			}
+
+			int totalCount = await filteredPlants.CountAsync();
+			int itemsToSkip = (page - 1) * pageSize;
 			List<Plant> plantList = await filteredPlants
-					.Include(pl => pl.Names)
-					.Include(pl => pl.ImageLinks)
-					.ToListAsync();
-			return _mapper.Map<List<PlantDto>>(plantList);
+				.OrderBy(pl => pl.PlantId)
+				.Skip(itemsToSkip)
+				.Take(pageSize)
+				.Include(pl => pl.ImageLinks)
+				.ToListAsync();
+			return (_mapper.Map<List<PlantDto>>(plantList), totalCount);
 		}
 
-
-
-		//public async Task<IEnumerable<PlantDto>> GetFiltered2(PlantDto? conditions)
-		//{
-		//	Expression<Func<Plant, bool>> basicFilterExpression = pl =>
-		//			conditions == null ||
-		//			((conditions.FlowerColorCode == -1 || pl.FlowerColorCode == conditions.FlowerColorCode) &&
-		//			(conditions.Poisonous == null || pl.Poisonous == conditions.Poisonous) &&
-		//			(conditions.ForHerbalTea == null || pl.ForHerbalTea == conditions.ForHerbalTea) &&
-		//			(conditions.PickingProhibited == null || pl.PickingProhibited == conditions.PickingProhibited));
-
-		//	string? nameToFind = conditions?.Names?.FirstOrDefault()?.Name;
-		//	Expression<Func<Plant, bool>> nameFilterExpression = pl =>
-		//			string.IsNullOrWhiteSpace(nameToFind) ||
-		//			pl.Names!.Any(pn => EF.Functions.ILike(pn.Name, $"%{nameToFind}%")); //case insensitive partial search 
-
-		//	var filteredPlants = _db.Plants
-		//		.Where(basicFilterExpression)
-		//		.Include(pl => pl.Names)
-		//		.Where(nameFilterExpression)
-		//		.Include(pl => pl.ImageLinks);
-		//	List<Plant> plantList = await filteredPlants.ToListAsync();
-		//	return _mapper.Map<List<PlantDto>>(plantList);
-		//}
-
-		public async Task<IEnumerable<PlantDto>> GetPage(int page, int pageSize)
+		public async Task<(IEnumerable<PlantDto>, int)> GetPage(int page = 1, int pageSize = int.MaxValue)
 		{
+			int totalCount = await _db.Plants.CountAsync();
 			int itemsToSkip = (page - 1) * pageSize;
 			List<Plant> plantList = await _db.Plants
 				.OrderBy(pl => pl.PlantId)
@@ -162,16 +134,7 @@ namespace Services.PlantsAPI.Repository
 				.Include(pl => pl.Names)
 				.Include(pl => pl.ImageLinks)
 				.ToListAsync();
-			return _mapper.Map<List<PlantDto>>(plantList);
-		}
-
-		public async Task<IEnumerable<PlantDto>> GetAll()
-		{
-			List<Plant> plantList = await _db.Plants
-				.Include(pl => pl.Names)
-				.Include(pl => pl.ImageLinks)
-				.ToListAsync();
-			return _mapper.Map<List<PlantDto>>(plantList);
+			return (_mapper.Map<List<PlantDto>>(plantList), totalCount);
 		}
 	}
 }

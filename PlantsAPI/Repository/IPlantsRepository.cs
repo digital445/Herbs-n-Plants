@@ -4,9 +4,9 @@ namespace Services.PlantsAPI.Repository
 {
 	public interface IPlantsRepository
 	{
-		public Task<IEnumerable<PlantDto>> GetFiltered(PlantDto? filter); //receives Plants matching the filter criteria
-		public Task<IEnumerable<PlantDto>> GetPage(int page, int pageSize); //gets a page of plantDtos with a given amount of items on page
-		public Task<IEnumerable<PlantDto>> GetAll(); //receives all Plants in db
+		public Task<(IEnumerable<PlantDto>, int)> GetPage(int page = 1, int pageSize = int.MaxValue); //gets a page of plantDtos with a given amount of items on page,
+																									   //default is one page with maximum items
+		public Task<(IEnumerable<PlantDto>, int)> GetFilteredPage(FilterDto? filter, int page = 1, int pageSize = int.MaxValue); //receives a plants page matching the filter criteria
 		public Task<PlantDto> GetPlantById(int plantId);
 		public Task<PlantDto> CreateUpdatePlant(PlantDto plantDto);
 		public Task<bool> DeletePlant(int plantId);
