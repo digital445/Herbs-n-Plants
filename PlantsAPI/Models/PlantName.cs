@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using static Services.PlantsAPI.StaticDetails;
 
 namespace Services.PlantsAPI.Models
 {
@@ -16,6 +17,9 @@ namespace Services.PlantsAPI.Models
 
 		[Required]
 		public string Name { get; set; } = "";
+		[Required]
+		[Column(TypeName = "integer")]
+		public Language Language { get; set; }
 
 		public class CaseInsensitiveNameComparer : IEqualityComparer<PlantName?>
 		{

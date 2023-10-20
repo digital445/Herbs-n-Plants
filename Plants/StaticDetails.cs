@@ -22,5 +22,15 @@
             Leaf,
             Stem
         }
-    }
+		/// <summary>
+		/// A language the PlantName is written with
+		/// </summary>
+		public enum Language
+		{
+			Unknown = int.MaxValue,
+			Latina = 1,
+			Russian = 2,
+			English = 3,
+		}
+	}
 }
