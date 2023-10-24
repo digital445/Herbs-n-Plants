@@ -8,7 +8,7 @@ namespace Services.PlantsAPI.Models
 		public int PlantId { get; set; }
 		public List<PlantName>? Names { get; set; } = new();
 
-		public int FlowerColorCode { get; set; } = -1; //the code of flower's color
+		public int FlowerColorCode { get; set; } //the code of flower's color
 		public bool? Poisonous { get; set; }
 		public bool? ForHerbalTea { get; set; }
 		public bool? PickingProhibited { get; set; } //if picking flowers is prohibited by law

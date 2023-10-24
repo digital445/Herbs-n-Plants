@@ -10,5 +10,6 @@ namespace Services.PlantsAPI.Repository
 		public Task<PlantDto> GetPlantById(int plantId);
 		public Task<PlantDto> CreateUpdatePlant(PlantDto plantDto);
 		public Task<bool> DeletePlant(int plantId);
+		public Task<IEnumerable<ColorDto>> GetPalette();
 	}
 }

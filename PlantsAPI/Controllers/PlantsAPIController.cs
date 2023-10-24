@@ -71,6 +71,24 @@ namespace Services.PlantsAPI.Controllers
 			return _response;
 		}
 
+		[HttpGet]
+		[Route("palette")]
+		public async Task<object> GetPalette()
+		{
+			try
+			{
+				var result = await _plantsRepository.GetPalette();
+				_response.Result = result;
+			}
+			catch (Exception ex)
+			{
+				_response.IsSuccess = false;
+				_response.ErrorMessages = new List<string> { ex.Message };
+			}
+			return _response;
+		}
+
+
 		[Authorize(Roles = "Admin,Contributor")]
 		[HttpPost]
 		[HttpPut]

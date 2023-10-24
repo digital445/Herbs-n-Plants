@@ -16,61 +16,44 @@ namespace Plants.Pages
 		public int PageId { get; set; } = 1;
 		public bool HasPreviousPage => PageId > 1;
 		public bool HasNextPage => PageId < TotalPages;
-		public bool FilterIsApplied => 
+		public bool FilterIsApplied =>
 			Filter != null && (
-				!string.IsNullOrWhiteSpace(Filter.Name) || 
+				!string.IsNullOrWhiteSpace(Filter.Name) ||
 				Filter.FlowerColorCode != -1 || Filter.Poisonous != null || Filter.ForHerbalTea != null || Filter.PickingProhibited != null
 			);
 		[BindProperty]
 		public FilterDto Filter { get; set; }
 
-		public List<int> ColorSet { get; set; } = new()
+		private List<ColorDto>? _palette;
+		/// <summary>
+		///gets the Palette either from the Session or from the PlantService
+		/// </summary>
+		public List<ColorDto>? Palette
 		{
-			0xFFFFFF, //white
-			0xFF0000, //red
-			0xFFA500, //orange
-			0xFFFF00, //yellow
-			0x00BFFF, //skyblue
-			0x0000FF, //blue
-			0x8F00FF, //violet 0x800080
-			0xE35B89, //pink
-			0x890835, //burgundy
-			0x000000  //black
-			//0xFFFFFF, //white
-			//0xFF0000, //red
-			//0xFFA500, //orange
-			//0xFFFF00, //yellow
-			//0x00BFFF, //skyblue
-			//0x0000FF, //blue
-			//0x8F00FF, //violet 0x800080
-			//0xE35B89, //pink
-			//0x890835, //burgundy
-			//0x000000  //black
-		};
+			get
+			{
+				if (_palette == null && HttpContext.Session.IsAvailable)
+				{
+					string? json = HttpContext.Session.GetString("palette");
+					if (string.IsNullOrEmpty(json)) //if Session does not contain the palette
+					{
+						var paletteResponse = _plantsService.GetPaletteAsync<ResponseDto>("").Result; //??? Is DeadLock possible?
+						if (paletteResponse != null && paletteResponse.IsSuccess)
+						{
+							json = Convert.ToString(paletteResponse.Result);
+							if (!string.IsNullOrEmpty(json))
+							{
+								HttpContext.Session.SetString("palette", json); //save palette to session
+							}
+						}
 
-		public List<int> ColorWheelColors = new()
-		{
-			0x000000,
-			0x8D6391, //aconitum
-			0xFF0000,
-			0xFF8000,
-			0xFFFF00,
-			0x80FF00,
-			0x00FF00,
-			0x00FF80,
-			0x00FFFF,
-			0x0080FF,
-			0x0000FF,
-			0x8000FF,
-			0xFF00FF,
-			0xFF0080,
-			0xFFFFFF
-		};
-
-
-
-
-
+					}
+					_palette = string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<IEnumerable<ColorDto>>(json)?.ToList();
+				}
+				return _palette;
+			}
+		}
+		
 		private readonly IPlantsService _plantsService;
 		private readonly ILogger<IndexModel> _logger;
 
@@ -79,9 +62,10 @@ namespace Plants.Pages
 		{
 			_logger = logger;
 			_plantsService = plantsService;
-			
-			Filter= new FilterDto();
+
+			Filter = new FilterDto();
 		}
+
 
 		public async Task OnGet()
 		{

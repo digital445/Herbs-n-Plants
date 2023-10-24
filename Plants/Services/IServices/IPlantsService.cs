@@ -10,5 +10,6 @@ namespace Plants.Services.IServices
         Task<T?> CreateAsync<T>(PlantDto plantDto, string token);
         Task<T?> UpdateAsync<T>(PlantDto plantDto, string token);
         Task<T?> DeleteAsync<T>(int id, string token);
-    }
+        Task<T?> GetPaletteAsync<T>(string token);
+	}
 }

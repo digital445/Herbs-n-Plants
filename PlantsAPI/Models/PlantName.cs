@@ -12,7 +12,7 @@ namespace Services.PlantsAPI.Models
 		[Key]
 		public int PlantNameId { get; set; }
 		public int PlantId { get; set; }
-		[ForeignKey("PlantId")]
+		[ForeignKey(nameof(PlantId))]
 		public virtual Plant? Plant { get; set; }
 
 		[Required]

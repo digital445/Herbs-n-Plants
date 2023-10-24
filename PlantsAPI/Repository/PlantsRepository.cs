@@ -3,9 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Services.PlantsAPI.DbContexts;
 using Services.PlantsAPI.Models;
 using Services.PlantsAPI.Models.Dto;
-using System.Drawing;
 using System.Linq.Expressions;
-using System.Runtime.InteropServices;
 
 namespace Services.PlantsAPI.Repository
 {
@@ -135,6 +133,12 @@ namespace Services.PlantsAPI.Repository
 				.Include(pl => pl.ImageLinks)
 				.ToListAsync();
 			return (_mapper.Map<List<PlantDto>>(plantList), totalCount);
+		}
+
+		public async Task<IEnumerable<ColorDto>> GetPalette()
+		{
+			List<Color> palette = await _db.Palette.ToListAsync();
+			return _mapper.Map<List<ColorDto>>(palette);
 		}
 	}
 }

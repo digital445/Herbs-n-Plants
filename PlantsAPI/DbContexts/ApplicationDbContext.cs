@@ -8,6 +8,7 @@ namespace Services.PlantsAPI.DbContexts
 	{
 		public DbSet<Plant> Plants { get; set; }
 		public DbSet<PlantName> PlantNames { get; set; }
+		public DbSet<Color> Palette { get; set; }
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
 		{
 			//!!!debug

@@ -84,5 +84,14 @@ namespace Plants.Services
                 AccessToken = token
             });
         }
+        public async Task<T?> GetPaletteAsync<T>(string token)
+        {
+            return await SendAsync<T>(new ApiRequest
+            {
+                ApiType = ApiType.GET,
+                Url = PlantsAPIBaseUrl + $"/api/plants/palette",
+                AccessToken = token
+            });
+        }
     }
 }
