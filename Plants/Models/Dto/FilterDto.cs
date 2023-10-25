@@ -4,14 +4,14 @@
 	{
 		public FilterDto()
 		{
-			Name = "";
+			Name = null;
 			FlowerColorCode = -1;
 			Poisonous = null;
 			ForHerbalTea = null;
 			PickingProhibited = null;
 		}
 
-		public string Name { get; set; }
+		public string? Name { get; set; }
 		/// <summary>
 		/// the code of flower's color
 		/// </summary>

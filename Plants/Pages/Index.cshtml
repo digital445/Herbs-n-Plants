@@ -10,12 +10,19 @@
 <div class="container mt-5">
 	<div class="card">
 		<div class="card-header" id="filterHeader">
-			<h5 class="mb-0">
-				<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterContent">
-					Filter
-				</button>
-				<a class="btn btn-link" href="/">Reset</a>
-			</h5>
+			<div class="row">
+				<div class="col col-auto">
+					<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterContent">
+						Filter
+					</button>
+				</div>
+				<div class="col col-auto">
+					<form method="get">
+						<input type="hidden" name="reset" value="true" />
+						<button class="btn btn-link" type="submit">Reset</button>
+					</form>
+				</div>
+			</div>
 		</div>
 
 		<div id="filterContent" class="@(Model.FilterIsApplied ? "show" : "collapse")">
@@ -163,28 +170,18 @@
 		<nav aria-label="Page navigation">
 			<ul class="pagination">
 				<li class="page-item @(Model.HasPreviousPage ? "enabled" : "disabled")">
-					<form asp-route-pageid="@(Model.PageId - 1)" method="post">
-						<input type="hidden" asp-for=Filter />
-						<button type="submit" class="page-link">Previous</button>
-					</form>
+					<a class="page-link" asp-route-pageid="@(Model.PageId - 1)">Previous</a>
 				</li>
-
 
 				@for (int i = 1; i <= Model.TotalPages; i++)
 				{
 					<li class="page-item @(Model.PageId == i ? "active" : "")">
-						<form asp-route-pageid="@i" method="post">
-							<input type="hidden" asp-for=Filter />
-							<button type="submit" class="page-link">@i</button>
-						</form>
+						<a class="page-link" asp-route-pageid="@i">@i</a>
 					</li>
 				}
 
 				<li class="page-item @(Model.HasNextPage ? "enabled" : "disabled")">
-					<form asp-route-pageid="@(Model.PageId + 1)" method="post">
-						<input type="hidden" asp-for=Filter />
-						<button type="submit" class="page-link">Next</button>
-					</form>
+					<a class="page-link" asp-route-pageid="@(Model.PageId + 1)">Next</a>
 				</li>
 			</ul>
 		</nav>

@@ -21,10 +21,24 @@ namespace Plants.Pages
 				!string.IsNullOrWhiteSpace(Filter.Name) ||
 				Filter.FlowerColorCode != -1 || Filter.Poisonous != null || Filter.ForHerbalTea != null || Filter.PickingProhibited != null
 			);
+		private FilterDto? _filter;
 		[BindProperty]
-		public FilterDto Filter { get; set; }
+		public FilterDto Filter
+		{
+			get
+			{
+				if (_filter == null && HttpContext.Session.IsAvailable)
+				{
+					string? json = HttpContext.Session.GetString("filter");
+					_filter = string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<FilterDto>(json);
+				}
+				return _filter ??= new FilterDto();
+			}
+			set { _filter = value; }
+		}
 
 		private List<ColorDto>? _palette;
+
 		/// <summary>
 		///gets the Palette either from the Session or from the PlantService
 		/// </summary>
@@ -53,7 +67,7 @@ namespace Plants.Pages
 				return _palette;
 			}
 		}
-		
+
 		private readonly IPlantsService _plantsService;
 		private readonly ILogger<IndexModel> _logger;
 
@@ -62,14 +76,25 @@ namespace Plants.Pages
 		{
 			_logger = logger;
 			_plantsService = plantsService;
-
-			Filter = new FilterDto();
 		}
 
 
-		public async Task OnGet()
+		public async Task OnGet(bool reset = false)
 		{
-			var response = await _plantsService.GetPageAsync<ResponseDto>(PageId, pageSize, "");
+			ResponseDto? response;
+			if (reset)
+			{
+				HttpContext.Session.Remove("filter"); //removes the filter from the page session
+			}
+			if (FilterIsApplied)
+			{
+				response = await _plantsService.GetFilteredAsync<ResponseDto>(Filter, PageId, pageSize, "");
+			}
+			else
+			{
+				response = await _plantsService.GetPageAsync<ResponseDto>(PageId, pageSize, "");
+			}
+
 			if (response != null && response.IsSuccess)
 			{
 				RequestedPlants = JsonConvert.DeserializeObject<IEnumerable<PlantDto>>(Convert.ToString(response.Result)!);
@@ -79,7 +104,8 @@ namespace Plants.Pages
 
 		public async Task OnPost()
 		{
-			// Filter передаётся в Request.Form
+			HttpContext.Session.SetString("filter", JsonConvert.SerializeObject(Filter)); //saves the filter to the page session state
+
 			var response = await _plantsService.GetFilteredAsync<ResponseDto>(Filter, PageId, pageSize, "");
 			if (response != null && response.IsSuccess)
 			{
