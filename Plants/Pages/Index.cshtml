@@ -48,7 +48,7 @@
 
 									@if (Model.Palette != null)
 									{
-										foreach (var clr in Model.Palette)
+										foreach (var clr in Model.Palette.OrderBy(clr => clr.ColorCode))
 										{
 											<input type="radio" id="@clr.ColorCode" asp-for=Filter.FlowerColorCode value=@clr.ColorCode>
 											<label for="@clr.ColorCode" title="@clr.Name" style="background-color: @($"#{clr.ColorCode:X6}");"></label>
