@@ -112,17 +112,6 @@ namespace Plants.Pages
 				RequestedPlants = JsonConvert.DeserializeObject<IEnumerable<PlantDto>>(Convert.ToString(response.Result)!);
 				TotalCount = response.TotalCount;
 			}
-
-		}
-
-		internal string NullBoolToString(bool? b)
-		{
-			return b switch
-			{
-				true => "Yes",
-				false => "No",
-				_ => "Unknown"
-			};
 		}
 	}
 }

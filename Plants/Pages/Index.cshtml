@@ -3,6 +3,27 @@
 @using Plants.Models.Dto;
 @using System.Drawing;
 @model IndexModel
+@functions 
+{
+	private string NullBoolPlantToString(bool? b)
+	{
+		return b switch
+		{
+			true => "Yes",
+			false => "No",
+			_ => "Unknown"
+		};
+	}
+	private string NullBoolFilterToString(bool? b)
+	{
+		return b switch
+		{
+			true => "Yes",
+			false => "No",
+			_ => "Any"
+		};
+	}
+}
 @{
 	ViewData["Title"] = "Home page";
 }
@@ -59,63 +80,29 @@
 						</div>
 					</div>
 
-					<div class="row" id="Poisonous">
-						<div class="col-2">
-							Poisonous
-						</div>
-						<div class="col-10">
-							<label>
-								<input type="radio" asp-for="Filter.Poisonous" value="true" checked="@(Model.Filter.Poisonous == true)">
-								Yes
-							</label>
-							<label>
-								<input type="radio" asp-for="Filter.Poisonous" value="false" checked="@(Model.Filter.Poisonous == false)">
-								No
-							</label>
-							<label>
-								<input type="radio" asp-for="Filter.Poisonous" value="" checked="@(Model.Filter.Poisonous == null)">
-								Any
-							</label>
-						</div>
-					</div>
-					<div class="row" id="ForHerbalTea">
-						<div class="col-2">
-							For herbal tea
-						</div>
-						<div class="col-10">
-							<label>
-								<input type="radio" asp-for="Filter.ForHerbalTea" value="true" checked="@(Model.Filter.ForHerbalTea == true)">
-								Yes
-							</label>
-							<label>
-								<input type="radio" asp-for="Filter.ForHerbalTea" value="false" checked="@(Model.Filter.ForHerbalTea == false)">
-								No
-							</label>
-							<label>
-								<input type="radio" asp-for="Filter.ForHerbalTea" value="" checked="@(Model.Filter.ForHerbalTea == null)">
-								Any
-							</label>
-						</div>
-					</div>
-					<div class="row" id="PickingProhibited">
-						<div class="col-2">
-							Picking is prohibited
-						</div>
-						<div class="col-10">
-							<label>
-								<input type="radio" asp-for="Filter.PickingProhibited" value="true" checked="@(Model.Filter.PickingProhibited == true)">
-								Yes
-							</label>
-							<label>
-								<input type="radio" asp-for="Filter.PickingProhibited" value="false" checked="@(Model.Filter.PickingProhibited == false)">
-								No
-							</label>
-							<label>
-								<input type="radio" asp-for="Filter.PickingProhibited" value="" checked="@(Model.Filter.PickingProhibited == null)">
-								Any
-							</label>
-						</div>
-					</div>
+					@*Displaying nullBool filter properties*@
+					@{
+						bool?[] nullBoolValues = { true, false, null };
+						var nullBoolProperties = Model.Filter.GetType().GetProperties().Where(pi => pi.PropertyType == typeof(bool?));
+						foreach (PropertyInfo pi in nullBoolProperties)
+						{
+							<div class="row" id="@pi.Name">
+								<div class="col-2">
+									@pi.Name
+								</div>
+								<div class="col-10">
+									@foreach (bool? nullBool in nullBoolValues)
+									{
+										<label>
+											<input type="radio" name=@($"Filter.{pi.Name}") value=@(nullBool?.ToString() ?? "null") checked="@((bool?)pi.GetValue(Model.Filter) == nullBool)">
+											@NullBoolFilterToString(nullBool)
+										</label>
+									}
+								</div>
+							</div>
+						}
+					}
+
 					<div class="row" id="Submit">
 						<div class="col-1">
 							<button type="submit" class="btn btn-primary mt-3">Apply</button>
@@ -148,9 +135,9 @@
 										<h3 class="card-title text-success">@pn.Name</h3>
 									}
 									<p class="card-text">
-										Poisonous:	@Model.NullBoolToString(plant.Poisonous)<br>
-										For herbal tea: @Model.NullBoolToString(plant.ForHerbalTea)<br>
-										Picking is prohibited: @Model.NullBoolToString(plant.PickingProhibited)
+										Poisonous:	@NullBoolPlantToString(plant.Poisonous)<br>
+										For herbal tea: @NullBoolPlantToString(plant.ForHerbalTea)<br>
+										Picking is prohibited: @NullBoolPlantToString(plant.PickingProhibited)
 									</p>
 								</div>
 							</div>
