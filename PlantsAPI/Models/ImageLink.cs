@@ -14,6 +14,7 @@ namespace Services.PlantsAPI.Models
 
 		[Required]
 		public string? ImageUrl { get; set; }
+		public string? ImageServiceId { get; set; }
 		[Required]
 		[Column(TypeName = "integer")]
 		public ViewType ViewType { get; set; }
