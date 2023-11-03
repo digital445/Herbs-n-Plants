@@ -32,5 +32,24 @@
 			Russian = 2,
 			English = 3,
 		}
+
+		public static string NullBoolPlantToString(bool? b)
+		{
+			return b switch
+			{
+				true => "Yes",
+				false => "No",
+				_ => "Unknown"
+			};
+		}
+		public static string NullBoolFilterToString(bool? b)
+		{
+			return b switch
+			{
+				true => "Yes",
+				false => "No",
+				_ => "Any"
+			};
+		}
 	}
 }
