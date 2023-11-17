@@ -89,7 +89,7 @@ namespace Services.PlantsAPI.Controllers
 		}
 
 
-		[Authorize(Roles = "Admin,Contributor")]
+		//[Authorize(Roles = "Admin,Contributor")]
 		[HttpPost]
 		[HttpPut]
 		public async Task<object> CreateUpdate([FromBody] PlantDto plant)

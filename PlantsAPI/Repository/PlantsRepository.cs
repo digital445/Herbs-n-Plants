@@ -21,12 +21,17 @@ namespace Services.PlantsAPI.Repository
 		public async Task<PlantDto> CreateUpdatePlant(PlantDto plantDto)
 		{
 			Plant plant = _mapper.Map<Plant>(plantDto);
+			if (!CheckPlantNames(plant.Names))
+			{
+				throw new Exception("There should be at least one name for the plant and no names should be empty!");
+			}
+
 			Plant? dbPlant = await _db.Plants.AsNoTracking().FirstOrDefaultAsync(pl => pl.PlantId == plant.PlantId);
 
-			var plantNames = plant.Names ?? throw new Exception("There should be at least one name for the plant!");
+			var plantNames = plant.Names;
 
-			var hs = new HashSet<PlantName>(plantNames, new PlantName.CaseInsensitiveNameComparer());
-			if (hs.Count < plantNames.Count)
+			var hs = new HashSet<PlantName>(plantNames!, new PlantName.CaseInsensitiveNameComparer());
+			if (hs.Count < plantNames!.Count)
 			{
 				throw new Exception("Duplicate names are not allowed!");
 			}
@@ -139,6 +144,13 @@ namespace Services.PlantsAPI.Repository
 		{
 			List<Color> palette = await _db.Palette.ToListAsync();
 			return _mapper.Map<List<ColorDto>>(palette);
+		}
+
+		private bool CheckPlantNames(IEnumerable<PlantName>? plantNames)
+		{
+			if (plantNames == null || !plantNames.Any() || plantNames.Any(pn => string.IsNullOrWhiteSpace(pn?.Name))) 
+				return false;
+			return true;
 		}
 	}
 }

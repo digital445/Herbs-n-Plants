@@ -9,12 +9,10 @@ namespace Plants.Services
 {
 	public class BaseService : IBaseService
 	{
-		//public ResponseDto Response { get; set; }
 		private readonly IHttpClientFactory _httpClientFactory;
 
 		public BaseService(IHttpClientFactory httpClientFactory) //is called while Dependency Injection is used
 		{
-            //Response = new ResponseDto();
             _httpClientFactory = httpClientFactory;
 		}
 
@@ -29,7 +27,11 @@ namespace Plants.Services
 				client.DefaultRequestHeaders.Clear();
 				if (apiRequest.Data != null)
 				{
-					message.Content = new StringContent(JsonConvert.SerializeObject(apiRequest.Data), Encoding.UTF8, "application/json");
+					message.Content = apiRequest.Data switch
+					{
+						MultipartFormDataContent formData => formData,
+						_ => new StringContent(JsonConvert.SerializeObject(apiRequest.Data), Encoding.UTF8, "application/json")
+					};
 				}
 
 				if (!string.IsNullOrEmpty(apiRequest.AccessToken))

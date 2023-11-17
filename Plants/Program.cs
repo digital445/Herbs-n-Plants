@@ -1,7 +1,6 @@
 using Plants;
 using Plants.Services;
 using Plants.Services.IServices;
-using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,8 +37,10 @@ builder.Services.AddAuthentication(options =>
 	});
 
 builder.Services.AddHttpClient<IPlantsService, PlantsService>();
+builder.Services.AddHttpClient<IImageService, ImgurImageService>();
 StaticDetails.PlantsAPIBaseUrl = builder.Configuration["ServiceUrls:PlantsAPI"];
 builder.Services.AddScoped<IPlantsService, PlantsService>();
+builder.Services.AddScoped<IImageService, ImgurImageService>();
 
 var app = builder.Build();
 
