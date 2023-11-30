@@ -30,7 +30,7 @@
 			Unknown = int.MaxValue,
 			Latina = 1,
 			Russian = 2,
-			English = 3,
+			English = 3
 		}
 
 		public static string NullBoolPlantToString(bool? b)

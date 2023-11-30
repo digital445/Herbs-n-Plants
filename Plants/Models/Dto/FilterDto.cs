@@ -22,5 +22,8 @@
 		/// picking flowers is prohibited by law
 		/// </summary>
 		public bool? PickingProhibited { get; set; }
+		public bool IsApplied => 
+			!string.IsNullOrWhiteSpace(Name) || FlowerColorCode != -1 || Poisonous != null || ForHerbalTea != null || PickingProhibited != null;
+
 	}
 }

@@ -13,7 +13,7 @@ namespace Plants.Services
         {
         }
 
-        public async Task<T?> CreateAsync<T>(PlantDto plantDto, string token)
+        public async Task<T?> CreateUpdateAsync<T>(PlantDto plantDto, string token)
         {
             return await SendAsync<T>(new ApiRequest {
                 ApiType = ApiType.POST,
@@ -22,17 +22,6 @@ namespace Plants.Services
                 AccessToken = token
             });
         }
-        public async Task<T?> UpdateAsync<T>(PlantDto plantDto, string token)
-        {
-            return await SendAsync<T>(new ApiRequest
-            {
-                ApiType = ApiType.PUT,
-                Url = PlantsAPIBaseUrl + "/api/plants",
-                Data = plantDto,
-                AccessToken = token
-            });
-        }
-
         public async Task<T?> DeleteAsync<T>(int id, string token)
         {
             return await SendAsync<T>(new ApiRequest

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Services.PlantsAPI.Models.Dto;
 using Services.PlantsAPI.Repository;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Services.PlantsAPI.Controllers
 {
@@ -24,10 +26,8 @@ namespace Services.PlantsAPI.Controllers
 		{
 			try
 			{
-				var result = await _plantsRepository.GetPage(page, pageSize);
-				_response.Result = result.Item1;
-				_response.TotalCount = result.Item2;
-			}
+				_response.Result = await _plantsRepository.GetPage(page, pageSize);
+		}
 			catch (Exception ex)
 			{
 				_response.IsSuccess = false;
@@ -59,9 +59,7 @@ namespace Services.PlantsAPI.Controllers
 		{
 			try
 			{
-				var result = await _plantsRepository.GetFilteredPage(filter, page, pageSize);
-				_response.Result = result.Item1;
-				_response.TotalCount = result.Item2;
+				_response.Result = await _plantsRepository.GetFilteredPage(filter, page, pageSize);
 			}
 			catch (Exception ex)
 			{
@@ -91,7 +89,6 @@ namespace Services.PlantsAPI.Controllers
 
 		//[Authorize(Roles = "Admin,Contributor")]
 		[HttpPost]
-		[HttpPut]
 		public async Task<object> CreateUpdate([FromBody] PlantDto plant)
 		{
 			try
@@ -111,7 +108,7 @@ namespace Services.PlantsAPI.Controllers
 			return _response;
 		}
 
-		[Authorize(Roles = "Admin")]
+		//[Authorize(Roles = "Admin")]
 		[HttpDelete]
 		[Route("{id}")]
 		public async Task<object> Delete(int id)

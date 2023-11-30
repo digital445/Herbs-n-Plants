@@ -38,5 +38,16 @@ namespace Plants.Services
 				AccessToken = token
 			});
 		}
+		public async Task<T?> DeleteImageAsync<T>(string imageServiceId, string token)
+		{
+			return await SendAsync<T?>(new ApiRequest
+			{
+				ApiType = ApiType.DELETE,
+				Url = $"https://api.imgur.com/3/image/{imageServiceId}",
+				AccessToken = token
+			});
+		}
+
+
 	}
 }

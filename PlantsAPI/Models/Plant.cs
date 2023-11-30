@@ -6,7 +6,7 @@ namespace Services.PlantsAPI.Models
 	{
 		[Key]
 		public int PlantId { get; set; }
-		public List<PlantName>? Names { get; set; } = new();
+		public List<PlantName> Names { get; set; } = new();
 
 		public int FlowerColorCode { get; set; } //the code of flower's color
 		public bool? Poisonous { get; set; }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using Plants.Models.Dto;
+using Plants.Models.Dto.Imgur;
 using Plants.Services.IServices;
 
 namespace Plants.Pages
@@ -12,15 +14,11 @@ namespace Plants.Pages
 		public int TotalPages => (int)Math.Ceiling(TotalCount / (double)pageSize);
 		public int TotalCount { get; set; }
 		public IEnumerable<PlantDto>? RequestedPlants { get; set; }
+		public bool NotAuthorized { get; set; } = false;
 		[BindProperty(SupportsGet = true)]
 		public int PageId { get; set; } = 1;
 		public bool HasPreviousPage => PageId > 1;
 		public bool HasNextPage => PageId < TotalPages;
-		public bool FilterIsApplied =>
-			Filter != null && (
-				!string.IsNullOrWhiteSpace(Filter.Name) ||
-				Filter.FlowerColorCode != -1 || Filter.Poisonous != null || Filter.ForHerbalTea != null || Filter.PickingProhibited != null
-			);
 		private FilterDto? _filter;
 		[BindProperty]
 		public FilterDto Filter
@@ -36,7 +34,8 @@ namespace Plants.Pages
 			}
 			set { _filter = value; }
 		}
-
+		//[BindProperty]
+		//public PlantDto Plant { get; set; }
 		private List<ColorDto>? _palette;
 
 		/// <summary>
@@ -69,13 +68,15 @@ namespace Plants.Pages
 		}
 
 		private readonly IPlantsService _plantsService;
+		private readonly IImageService _imageService;
 		private readonly ILogger<IndexModel> _logger;
 
 
-		public IndexModel(ILogger<IndexModel> logger, IPlantsService plantsService)
+		public IndexModel(ILogger<IndexModel> logger, IPlantsService plantsService, IImageService imageService)
 		{
 			_logger = logger;
 			_plantsService = plantsService;
+			_imageService = imageService;
 		}
 
 
@@ -86,7 +87,7 @@ namespace Plants.Pages
 			{
 				HttpContext.Session.Remove("filter"); //removes the filter from the page session
 			}
-			if (FilterIsApplied)
+			if (Filter.IsApplied)
 			{
 				response = await _plantsService.GetFilteredAsync<ResponseDto>(Filter, PageId, pageSize, "");
 			}
@@ -97,8 +98,12 @@ namespace Plants.Pages
 
 			if (response != null && response.IsSuccess)
 			{
-				RequestedPlants = JsonConvert.DeserializeObject<IEnumerable<PlantDto>>(Convert.ToString(response.Result)!);
-				TotalCount = response.TotalCount;
+				var result = JsonConvert.DeserializeObject<PageResultDto>(Convert.ToString(response.Result)!);
+				if (result != null)
+				{
+					RequestedPlants = result.Plants;
+					TotalCount = result.TotalCount;
+				}
 			}
 		}
 
@@ -109,9 +114,59 @@ namespace Plants.Pages
 			var response = await _plantsService.GetFilteredAsync<ResponseDto>(Filter, PageId, pageSize, "");
 			if (response != null && response.IsSuccess)
 			{
-				RequestedPlants = JsonConvert.DeserializeObject<IEnumerable<PlantDto>>(Convert.ToString(response.Result)!);
-				TotalCount = response.TotalCount;
+				var result = JsonConvert.DeserializeObject<PageResultDto>(Convert.ToString(response.Result)!);
+				if (result != null)
+				{
+					RequestedPlants = result.Plants;
+					TotalCount = result.TotalCount;
+				}
 			}
+		}
+		public async Task<IActionResult> OnPostDelete(int plantId, List<string>? imageServiceIds)
+		{
+			string token = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
+			if (imageServiceIds != null)
+			{
+				foreach (var id in imageServiceIds)
+				{
+					var imageResponse = await _imageService.DeleteImageAsync<DeleteResponseDto>(id, token);
+					if (imageResponse == null || !imageResponse.IsSuccess || !imageResponse.success)  //the imgur service success and the general API success are both kept in mind
+					{
+						//unsuccessful imageService deletion
+						//??? try to mark imagelink for deletion
+
+					}
+				}
+			}
+
+			var psResponse = await _plantsService.DeleteAsync<ResponseDto>(plantId, "");
+			if (psResponse == null)
+			{
+				TempData["ResultMessages"] = "No response from `plantService`.";
+				TempData["Success"] = false;
+			}
+			else if (psResponse.IsSuccess)
+			{
+				bool responseResult = (bool)(psResponse.Result ?? false);
+				if (responseResult)
+				{
+					TempData["ResultMessages"] = $"Plant {plantId} is successfully deleted.";
+					TempData["Success"] = true;
+				}
+				else
+				{
+					TempData["ResultMessages"] = $"Plant {plantId} was not deleted on the server side. Either plantId does not exist in the database or internal server error is occured.";
+					TempData["Success"] = false;
+				}
+			}
+			else
+			{
+				psResponse.ErrorMessages?.Insert(0, "An error occured while requesting `plantService`.");
+				TempData["ResultMessages"] = psResponse.ErrorMessages;
+				TempData["Success"] = false;
+			}
+
+			return RedirectToPage("/ResultPage");
 		}
 	}
 }

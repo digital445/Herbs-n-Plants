@@ -50,6 +50,11 @@ namespace Plants.Services
 
 				apiResponse = await client.SendAsync(message);
 				string apiContent = await apiResponse.Content.ReadAsStringAsync();
+				if (string.IsNullOrEmpty(apiContent))
+				{
+					throw new Exception("HTTP-response: " + (int)apiResponse.StatusCode + " -- " + apiResponse.ReasonPhrase);
+				}
+
 				var apiResponseDto = JsonConvert.DeserializeObject<T>(apiContent);
 				return apiResponseDto;
 			}

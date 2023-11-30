@@ -36,7 +36,7 @@ namespace Services.PlantsAPI.Migrations
 
                     b.HasKey("ColorCode");
 
-                    b.ToTable("Palette");
+                    b.ToTable("Palette", (string)null);
                 });
 
             modelBuilder.Entity("Services.PlantsAPI.Models.ImageLink", b =>
@@ -64,7 +64,7 @@ namespace Services.PlantsAPI.Migrations
 
                     b.HasIndex("PlantId");
 
-                    b.ToTable("ImageLink");
+                    b.ToTable("ImageLink", (string)null);
                 });
 
             modelBuilder.Entity("Services.PlantsAPI.Models.Plant", b =>
@@ -89,7 +89,7 @@ namespace Services.PlantsAPI.Migrations
 
                     b.HasKey("PlantId");
 
-                    b.ToTable("Plants");
+                    b.ToTable("Plants", (string)null);
 
                     b.HasData(
                         new
@@ -135,7 +135,7 @@ namespace Services.PlantsAPI.Migrations
 
                     b.HasIndex("PlantId");
 
-                    b.ToTable("PlantNames");
+                    b.ToTable("PlantNames", (string)null);
 
                     b.HasData(
                         new
