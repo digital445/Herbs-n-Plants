@@ -22,7 +22,7 @@ namespace Services.PlantsAPI.Repository
 		{
 			Plant plant = _mapper.Map<Plant>(plantDto);
 
-			await ValidatePlantNames(plant.Names);
+			ValidatePlantNames(plant.Names);
 
 			Plant? dbPlant = await _db.Plants
 				.AsNoTracking()
@@ -134,7 +134,7 @@ namespace Services.PlantsAPI.Repository
 			return _mapper.Map<List<ColorDto>>(palette);
 		}
 
-		private async Task ValidatePlantNames(IEnumerable<PlantName>? plantNames)
+		private void ValidatePlantNames(List<PlantName>? plantNames)
 		{
 			//Verify that names exist and are not empty.
 			if (plantNames == null || !plantNames.Any() || plantNames.Any(pn => string.IsNullOrWhiteSpace(pn?.Name)))
@@ -143,20 +143,15 @@ namespace Services.PlantsAPI.Repository
 			}
 
 			//Check duplicates among plantNames
-			var hs = new HashSet<PlantName>(plantNames, new PlantName.CaseInsensitiveNameComparer());
-			if (hs.Count < plantNames.Count())
-			{
-				throw new Exception("Duplicate names are not allowed!");
-			}
+			var lowerNames = plantNames.Select(pn => pn.Name.ToLowerInvariant());
+			var hs = new HashSet<string>();
 
-			//Check duplicates between given plantNames and database plantNames
-			var sharedPlantNames = await _db.PlantNames
-				.Where(pn => plantNames.Any(pn2 => pn.Name == pn2.Name && pn.PlantId != pn2.PlantId)) //same names for different plants
-				.ToListAsync();
-			if (sharedPlantNames.Any())
+			foreach (var name in lowerNames)
 			{
-				var conflictingNames = sharedPlantNames.Select(pn => pn.Name);
-				throw new Exception($"Names {string.Join(", ", conflictingNames)} are occupied by other plants!");
+				if (!hs.Add(name))
+				{
+					throw new Exception("Duplicate names are not allowed!");
+				}
 			}
 		}
 	}
