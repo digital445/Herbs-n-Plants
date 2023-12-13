@@ -37,10 +37,10 @@ builder.Services.AddAuthentication(options =>
 	});
 
 builder.Services.AddHttpClient<IPlantsService, PlantsService>();
-builder.Services.AddHttpClient<IImageService, ImgurImageService>();
+builder.Services.AddHttpClient<IImageStorageService, ImgurImageStorageService>();
 StaticDetails.PlantsAPIBaseUrl = builder.Configuration["ServiceUrls:PlantsAPI"];
 builder.Services.AddScoped<IPlantsService, PlantsService>();
-builder.Services.AddScoped<IImageService, ImgurImageService>();
+builder.Services.AddScoped<IImageStorageService, ImgurImageStorageService>();
 
 var app = builder.Build();
 

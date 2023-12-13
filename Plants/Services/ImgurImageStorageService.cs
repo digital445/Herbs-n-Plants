@@ -5,10 +5,10 @@ using static Plants.StaticDetails;
 
 namespace Plants.Services
 {
-	public class ImgurImageService : BaseService, IImageService
+	public class ImgurImageStorageService : BaseService, IImageStorageService
 	{
 		private const string albumHash = "piwTiWk";
-		public ImgurImageService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+		public ImgurImageStorageService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
 		{
 		}
 

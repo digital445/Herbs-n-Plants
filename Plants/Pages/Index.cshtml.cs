@@ -1,14 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using Plants.Models.Dto;
 using Plants.Models.Dto.Imgur;
+using Plants.Pages.Shared;
 using Plants.Services.IServices;
 
 namespace Plants.Pages
 {
-	public class IndexModel : PageModel
+	public class IndexModel : BasePageModel
 	{
 		private readonly int pageSize = 3;
 		public int TotalPages => (int)Math.Ceiling(TotalCount / (double)pageSize);
@@ -34,8 +33,6 @@ namespace Plants.Pages
 			}
 			set { _filter = value; }
 		}
-		//[BindProperty]
-		//public PlantDto Plant { get; set; }
 		private List<ColorDto>? _palette;
 
 		/// <summary>
@@ -68,11 +65,11 @@ namespace Plants.Pages
 		}
 
 		private readonly IPlantsService _plantsService;
-		private readonly IImageService _imageService;
+		private readonly IImageStorageService _imageService;
 		private readonly ILogger<IndexModel> _logger;
 
 
-		public IndexModel(ILogger<IndexModel> logger, IPlantsService plantsService, IImageService imageService)
+		public IndexModel(ILogger<IndexModel> logger, IPlantsService plantsService, IImageStorageService imageService)
 		{
 			_logger = logger;
 			_plantsService = plantsService;
@@ -122,32 +119,55 @@ namespace Plants.Pages
 				}
 			}
 		}
-		public async Task<IActionResult> OnPostDelete(int plantId, List<string>? imageServiceIds)
+		public async Task<IActionResult> OnPostDelete(int plantId)
 		{
 			string token = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
-			if (imageServiceIds != null)
-			{
-				foreach (var id in imageServiceIds)
-				{
-					var imageResponse = await _imageService.DeleteImageAsync<DeleteResponseDto>(id, token);
-					if (imageResponse == null || !imageResponse.IsSuccess || !imageResponse.success)  //the imgur service success and the general API success are both kept in mind
-					{
-						//unsuccessful imageService deletion
-						//??? try to mark imagelink for deletion
 
-					}
+			PlantDto? plant = null;
+
+			var getResponse = await _plantsService.GetAsync<ResponseDto>(plantId, token);
+			if (getResponse != null && getResponse.IsSuccess)
+			{
+				plant = JsonConvert.DeserializeObject<PlantDto>(Convert.ToString(getResponse.Result)!);
+			}
+			if (plant == null)
+			{
+				SetResultMessages(false, "Couldn't get plant from server");
+				return RedirectToPage("/ResultPage");
+			}
+
+
+			foreach (var il in plant.ImageLinks)
+			{
+				string? id = il.ImageServiceId;
+				if (id == null)
+					continue;
+				var imageResponse = await _imageService.DeleteImageAsync<DeleteResponseDto>(id, token);
+				if (imageResponse == null || !imageResponse.IsSuccess || !imageResponse.success)  //unsuccessful imageService deletion
+				{
+					il.DeleteLater = true;
 				}
 			}
 
-			var psResponse = await _plantsService.DeleteAsync<ResponseDto>(plantId, "");
-			if (psResponse == null)
+			//!!! сейчас данные по неудаленным из ImageStorageService изображениям просто удаляются из БД
+			// нужно модифицировать DeleteAsync так, чтобы передавать на API ImageId неудаленных ImageLinks или
+			// (лучше, но сложнее) реализовать на API отложенное удаление Images из ImageStorageService
+			var deleteResponse = await _plantsService.DeleteAsync<ResponseDto>(plantId, "");
+			HandleDeleteResponse(deleteResponse, plantId);
+
+			return RedirectToPage("/ResultPage");
+		}
+
+		private void HandleDeleteResponse(ResponseDto? response, int plantId)
+		{
+			if (response == null)
 			{
 				TempData["ResultMessages"] = "No response from `plantService`.";
 				TempData["Success"] = false;
 			}
-			else if (psResponse.IsSuccess)
+			else if (response.IsSuccess)
 			{
-				bool responseResult = (bool)(psResponse.Result ?? false);
+				bool responseResult = (bool)(response.Result ?? false);
 				if (responseResult)
 				{
 					TempData["ResultMessages"] = $"Plant {plantId} is successfully deleted.";
@@ -161,12 +181,11 @@ namespace Plants.Pages
 			}
 			else
 			{
-				psResponse.ErrorMessages?.Insert(0, "An error occured while requesting `plantService`.");
-				TempData["ResultMessages"] = psResponse.ErrorMessages;
+				response.ErrorMessages?.Insert(0, "An error occured while requesting `plantService`.");
+				TempData["ResultMessages"] = response.ErrorMessages;
 				TempData["Success"] = false;
 			}
 
-			return RedirectToPage("/ResultPage");
 		}
 	}
 }

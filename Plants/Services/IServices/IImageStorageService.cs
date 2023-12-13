@@ -1,6 +1,6 @@
 ﻿namespace Plants.Services.IServices
 {
-	public interface IImageService
+	public interface IImageStorageService
 	{
 		Task<T?> UploadImageAsync<T>(IFormFile file, string token);
 		Task<T?> DeleteImageAsync<T>(string imageServiceId, string token);

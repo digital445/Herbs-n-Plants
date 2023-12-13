@@ -1,23 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using Plants.Services.IServices;
 using Plants.Models.Dto;
 using Plants.Models.Dto.Imgur;
 using static Plants.StaticDetails;
+using Plants.Pages.Shared;
 
 namespace Plants.Pages
 {
-	public class CreateUpdateModel : PageModel
+	public class CreateUpdateModel : BasePageModel
 	{
-		public CreateUpdateModel(IImageService imageService, IPlantsService plantsService)
+		public CreateUpdateModel(IImageStorageService imageService, IPlantsService plantsService)
 		{
 			_imageService = imageService;
 			_plantsService = plantsService;
 			Plant = new PlantDto();
 			Plant.Names.Add(new PlantNameDto());
 		}
-		private readonly IImageService _imageService;
+		private readonly IImageStorageService _imageService;
 		private readonly IPlantsService _plantsService;
 
 
@@ -54,7 +54,7 @@ namespace Plants.Pages
 			}
 		}
 
-		const string Token = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
+		private const string Token = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
 
 		public async Task<IActionResult> OnGet(int plantId = 0)
 		{
@@ -159,8 +159,7 @@ namespace Plants.Pages
 						var imageResponse = await _imageService.UploadImageAsync<UploadResponseDto>(file, Token);
 						if (imageResponse != null && imageResponse.IsSuccess && imageResponse.success) //the imgur service success and the general API success are both kept in mind
 						{
-							var imageData = imageResponse.data;
-							if (imageData != null)
+							if (imageResponse.data is ImageData imageData)
 							{
 								var imageLink = new ImageLinkDto
 								{
@@ -179,11 +178,6 @@ namespace Plants.Pages
 		private bool PlantHasImages() =>
 			Plant.ImageLinks.Any(il => !string.IsNullOrWhiteSpace(il.ImageUrl));
 
-		private void SetResultMessages(bool wasSuccess, params string[] messages)
-		{
-			TempData["ResultMessages"] = messages;
-			TempData["Success"] = wasSuccess;
-		}
 		private void HandleResponse(ResponseDto? response)
 		{
 			if (response == null)
