@@ -13,6 +13,6 @@ namespace Services.PlantsAPI.Models
 		public bool? ForHerbalTea { get; set; }
 		public bool? PickingProhibited { get; set; } //if picking flowers is prohibited by law
 
-		public List<ImageLink>? ImageLinks { get; set; } //Links to Images representing this type of Plant
+		public List<ImageLink> ImageLinks { get; set; } = new(); //Links to Images representing this type of Plant
 	}
 }

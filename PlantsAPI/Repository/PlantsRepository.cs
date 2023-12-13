@@ -24,41 +24,57 @@ namespace Services.PlantsAPI.Repository
 
 			ValidatePlantNames(plant.Names);
 
-			Plant? dbPlant = await _db.Plants
+			Plant? existingPlant = await _db.Plants
+				.Include(pl => pl.Names)
+				.Include(pl => pl.ImageLinks)
 				.AsNoTracking()
 				.FirstOrDefaultAsync(pl => pl.PlantId == plant.PlantId);
 
-			if (dbPlant == null) //plant does not exist in the database
+			if (existingPlant == null) //plant does not exist in the database
 			{
 				_db.Plants.Add(plant);
 			}
 			else
 			{
-				var dbPlantNames = await _db.PlantNames.AsNoTracking().Where(pn => pn.PlantId == plant.PlantId).ToListAsync();
-				_db.PlantNames.RemoveRange(dbPlantNames); //removes old names for this plant from db
-				
-				var dbImageLinks = await _db.ImageLink.AsNoTracking().Where(pn => pn.PlantId == plant.PlantId).ToListAsync();
-				_db.ImageLink.RemoveRange(dbImageLinks); //removes old image links for this plant from db
+				//first clear existing Names and ImageLinks
+				existingPlant.Names.ForEach(pn => pn.Plant = null); //cut ties with the parent plant to prevent tracking all related entities
+				_db.PlantNames.RemoveRange(existingPlant.Names);
+				existingPlant.ImageLinks.ForEach(il => il.Plant = null);
+				_db.ImageLink.RemoveRange(existingPlant.ImageLinks);
 
 				_db.Plants.Update(plant);
+
+				//update ImageLinks marked for delayed deletion
+				var imageLinksToDeleteLater = plant.ImageLinks.Where(il => il.DeleteLater).ToList(); //get imageLinks marked to delete them later
+				imageLinksToDeleteLater.ForEach(il => il.PlantId = null); //cut the relationship with the plant
+				_db.ImageLink.UpdateRange(imageLinksToDeleteLater);
 			}
 
 			await _db.SaveChangesAsync();
 
 			return _mapper.Map<Plant, PlantDto>(plant);
-
 		}
 
 		public async Task<bool> DeletePlant(int plantId)
 		{
 			try
 			{
-				Plant? plant = await _db.Plants.FirstOrDefaultAsync(plant => plant.PlantId == plantId);
+				Plant? plant = await _db.Plants.Include(pl => pl.ImageLinks).FirstOrDefaultAsync(plant => plant.PlantId == plantId);
 				if (plant == null)
 				{
 					return false;
 				}
+
+				var imageLinksToDelete = plant.ImageLinks.Where(il => !il.DeleteLater).ToList();
+				_db.ImageLink.RemoveRange(imageLinksToDelete);
+
+
+
+				//var imageLinksToKeep = plant.ImageLinks.Where(il => il.DeleteLater).ToList();
+				//imageLinksToKeep.ForEach(il => _db.Entry(il).State = EntityState.Detached);
+
 				_db.Plants.Remove(plant);
+				
 				await _db.SaveChangesAsync();
 				return true;
 			}

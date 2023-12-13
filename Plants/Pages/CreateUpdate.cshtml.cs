@@ -5,11 +5,10 @@ using Plants.Services.IServices;
 using Plants.Models.Dto;
 using Plants.Models.Dto.Imgur;
 using static Plants.StaticDetails;
-using Newtonsoft.Json.Linq;
 
 namespace Plants.Pages
 {
-    public class CreateUpdateModel : PageModel
+	public class CreateUpdateModel : PageModel
 	{
 		public CreateUpdateModel(IImageService imageService, IPlantsService plantsService)
 		{
@@ -23,8 +22,8 @@ namespace Plants.Pages
 
 
 		[BindProperty]
-        public PlantDto Plant { get; set; }
-        private List<ColorDto>? _palette;
+		public PlantDto Plant { get; set; }
+		private List<ColorDto>? _palette;
 
 		/// <summary>
 		///gets the Palette either from the Session or from the PlantService
@@ -57,34 +56,39 @@ namespace Plants.Pages
 
 		const string Token = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
 
-		public async Task OnGet(int plantId = 0)
+		public async Task<IActionResult> OnGet(int plantId = 0)
 		{
 			if (plantId > 0) //Plant update is coming
 			{
 				var plantResponse = await _plantsService.GetAsync<ResponseDto>(plantId, "");
 				if (plantResponse != null && plantResponse.IsSuccess)
 				{
-					Plant = JsonConvert.DeserializeObject<PlantDto>(Convert.ToString(plantResponse.Result)!) ?? Plant;
+					string json = Convert.ToString(plantResponse.Result) ?? string.Empty;
+					Plant = JsonConvert.DeserializeObject<PlantDto>(json) ?? Plant;
+
+					//save server response
+					TempData["dbPlant"] = json;
+					return Page();
 				}
 				else
 				{
-					//!!!error processing
+					SetResultMessages(false, "No plant data was received from server");
+					return RedirectToPage("/ResultPage");
 				}
 			}
+			TempData["dbPlant"] = null;
+			return Page();
 		}
 		public async Task<IActionResult> OnPost(List<IFormFile> files, List<ViewType> viewTypes)
 		{
 			try
 			{
-				ValidatePlantNames();
+				ValidatePlant(files.Count);
+
+				await DeleteImagesFromStorage();
 
 				await UploadImageFiles(files, viewTypes);
-
-				if (!PlantHasImages())
-				{
-					SetResultMessages(false, "Plant with no images cannot be created or updated.");
-					return RedirectToPage("/ResultPage");
-				}
+				HandleUpload();
 
 				var psResponse = await _plantsService.CreateUpdateAsync<ResponseDto>(Plant, "");
 				HandleResponse(psResponse);
@@ -95,20 +99,53 @@ namespace Plants.Pages
 			{
 				SetResultMessages(false,
 					"An exception occured while creating the Plant.",
-					ex.Message, 
+					ex.Message,
 					ex.InnerException?.Message ?? "");
 				return RedirectToPage("/ResultPage");
-			}			
+			}
 		}
-
-		private void ValidatePlantNames()
+#region Private
+		private async Task DeleteImagesFromStorage()
 		{
+			string? json = (string?)TempData["dbPlant"];
+			if (string.IsNullOrEmpty(json))
+				return;
+			PlantDto? dbPlant = JsonConvert.DeserializeObject<PlantDto>(json);
+			if (dbPlant == null)
+				return;
+			var imageLinksToDelete = dbPlant.ImageLinks
+				.Except(Plant.ImageLinks, new ImageLinkDto.IdComparer());
+
+			foreach (var il in imageLinksToDelete)
+			{
+				if (string.IsNullOrEmpty(il.ImageServiceId))
+				{
+					continue;
+				}
+				var deleteResponse = await _imageService.DeleteImageAsync<DeleteResponseDto>(il.ImageServiceId, Token);
+				if (deleteResponse == null || !deleteResponse.IsSuccess || !deleteResponse.success)
+				{
+					//mark as deleted for further deletion
+					il.DeleteLater = true;
+					Plant.ImageLinks.Add(il);
+				}
+			}
+		}
+		private void ValidatePlant(int newImagesCount)
+		{
+			//plant names validation
 			var notEmptyNames = Plant.Names.Where(pn => !string.IsNullOrWhiteSpace(pn.Name)).ToList();
 			if (!notEmptyNames.Any())
 			{
 				throw new Exception("At least one meaningful Name should be added!");
 			}
 			Plant.Names = notEmptyNames;
+
+			//number of images validation
+			if (newImagesCount + Plant.ImageLinks.Count == 0)
+			{
+				throw new Exception("Plant with no images cannot be created or updated!");
+			}
 		}
 		private async Task UploadImageFiles(List<IFormFile> files, List<ViewType> viewTypes)
 		{
@@ -138,11 +175,8 @@ namespace Plants.Pages
 				}
 			}
 		}
-		/// <summary>
-		/// Check whether the plant has at least one image URL
-		/// </summary>
-		/// <returns></returns>
-		private bool PlantHasImages() => 
+
+		private bool PlantHasImages() =>
 			Plant.ImageLinks.Any(il => !string.IsNullOrWhiteSpace(il.ImageUrl));
 
 		private void SetResultMessages(bool wasSuccess, params string[] messages)
@@ -174,5 +208,12 @@ namespace Plants.Pages
 				}
 			}
 		}
+		private void HandleUpload()
+		{
+			if (!PlantHasImages())
+				throw new Exception("Plant with no images cannot be created or updated.");
+		}
+
+#endregion
 	}
 }
