@@ -2,7 +2,6 @@
 {
     public class UploadResponseDto : BaseResponseDto
     {
-        public ImageData? data { get; set; }
     }
 
     public class ImageData
