@@ -26,7 +26,8 @@ namespace Services.PlantsAPI.Controllers
 		{
 			try
 			{
-				_response.Result = await _plantsRepository.GetPage(page, pageSize);
+				PageResultDto result = await _plantsRepository.GetPage(page, pageSize);
+				_response.Result = result;
 		}
 			catch (Exception ex)
 			{
@@ -42,7 +43,7 @@ namespace Services.PlantsAPI.Controllers
 		{
 			try
 			{
-				PlantDto? plant = await _plantsRepository.GetPlantById(id);
+				PlantDto plant = await _plantsRepository.GetPlantById(id);
 				_response.Result = plant;
 			}
 			catch (Exception ex)
@@ -59,7 +60,8 @@ namespace Services.PlantsAPI.Controllers
 		{
 			try
 			{
-				_response.Result = await _plantsRepository.GetFilteredPage(filter, page, pageSize);
+				PageResultDto result = await _plantsRepository.GetFilteredPage(filter, page, pageSize);
+				_response.Result = result;
 			}
 			catch (Exception ex)
 			{
@@ -75,7 +77,7 @@ namespace Services.PlantsAPI.Controllers
 		{
 			try
 			{
-				var result = await _plantsRepository.GetPalette();
+				IEnumerable<ColorDto> result = await _plantsRepository.GetPalette();
 				_response.Result = result;
 			}
 			catch (Exception ex)
@@ -117,6 +119,39 @@ namespace Services.PlantsAPI.Controllers
 			{
 				bool IsSuccess = await _plantsRepository.DeletePlant(id);
 				_response.Result = IsSuccess;
+			}
+			catch (Exception ex)
+			{
+				_response.IsSuccess = false;
+				_response.ErrorMessages = new List<string> { ex.Message };
+			}
+			return _response;
+		}
+
+		[HttpGet]
+		[Route("orphaned-imagelinks")]
+		public async Task<object> GetOrphanedImageLinks()
+		{
+			try
+			{
+				IEnumerable<ImageLinkDto> orphanedImageLinks = await _plantsRepository.GetOrphanedImageLinks();
+				_response.Result = orphanedImageLinks;
+			}
+			catch (Exception ex)
+			{
+				_response.IsSuccess = false;
+				_response.ErrorMessages = new List<string> { ex.Message };
+			}
+			return _response;
+		}
+
+		[HttpDelete]
+		[Route("orphaned-imagelinks")]
+		public async Task<object> DeleteOrphanedImageLinks([FromBody] IEnumerable<int> ids)
+		{
+			try
+			{
+				await _plantsRepository.DeleteOrphanedImageLinks(ids);
 			}
 			catch (Exception ex)
 			{

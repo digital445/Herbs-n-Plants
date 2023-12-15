@@ -41,6 +41,7 @@ builder.Services.AddHttpClient<IImageStorageService, ImgurImageStorageService>()
 StaticDetails.PlantsAPIBaseUrl = builder.Configuration["ServiceUrls:PlantsAPI"];
 builder.Services.AddScoped<IPlantsService, PlantsService>();
 builder.Services.AddScoped<IImageStorageService, ImgurImageStorageService>();
+builder.Services.AddHostedService<ImageLinkCleanupService>();
 
 var app = builder.Build();
 

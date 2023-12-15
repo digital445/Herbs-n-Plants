@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Services.PlantsAPI.DbContexts;
 using Services.PlantsAPI.Models;
 using Services.PlantsAPI.Models.Dto;
+using System.Data;
 using System.Linq.Expressions;
 
 namespace Services.PlantsAPI.Repository
@@ -59,21 +60,18 @@ namespace Services.PlantsAPI.Repository
 		{
 			try
 			{
-				Plant? plant = await _db.Plants.Include(pl => pl.ImageLinks).FirstOrDefaultAsync(plant => plant.PlantId == plantId);
+				Plant? plant = await _db.Plants.Include(pl => pl.ImageLinks)
+					.AsNoTracking()
+					.FirstOrDefaultAsync(plant => plant.PlantId == plantId);
 				if (plant == null)
 				{
 					return false;
 				}
 
-				var imageLinksToDelete = plant.ImageLinks.Where(il => !il.DeleteLater).ToList();
-				_db.ImageLink.RemoveRange(imageLinksToDelete);
+				var imageLinksToDeleteNow = plant.ImageLinks.Where(il => !il.DeleteLater).ToList(); 
 
-
-
-				//var imageLinksToKeep = plant.ImageLinks.Where(il => il.DeleteLater).ToList();
-				//imageLinksToKeep.ForEach(il => _db.Entry(il).State = EntityState.Detached);
-
-				_db.Plants.Remove(plant);
+				_db.Plants.Remove(plant); //deletes Plant and related Names, doesn't delete ImageLinks, but cuts their connection to the Plant
+				_db.ImageLink.RemoveRange(imageLinksToDeleteNow);
 				
 				await _db.SaveChangesAsync();
 				return true;
@@ -148,6 +146,19 @@ namespace Services.PlantsAPI.Repository
 		{
 			List<Color> palette = await _db.Palette.ToListAsync();
 			return _mapper.Map<List<ColorDto>>(palette);
+		}
+
+		public async Task<IEnumerable<ImageLinkDto>> GetOrphanedImageLinks()
+		{
+			List<ImageLink> orphanedImageLinks = await _db.ImageLink.Where(il => il.PlantId == null).ToListAsync();
+			return _mapper.Map<List<ImageLinkDto>>(orphanedImageLinks);
+		}
+
+		public async Task DeleteOrphanedImageLinks(IEnumerable<int> ids)
+		{
+			var linksToDelete = await _db.ImageLink.Where(il => ids.Contains(il.ImageId)).ToListAsync();
+			_db.RemoveRange(linksToDelete);
+			await _db.SaveChangesAsync();
 		}
 
 		private void ValidatePlantNames(List<PlantName>? plantNames)

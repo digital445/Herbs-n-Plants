@@ -11,5 +11,7 @@ namespace Services.PlantsAPI.Repository
 		public Task<PlantDto> CreateUpdatePlant(PlantDto plantDto);
 		public Task<bool> DeletePlant(int plantId);
 		public Task<IEnumerable<ColorDto>> GetPalette();
+		public Task<IEnumerable<ImageLinkDto>> GetOrphanedImageLinks();
+		public Task DeleteOrphanedImageLinks(IEnumerable<int> ids);
 	}
 }

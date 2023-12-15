@@ -64,7 +64,7 @@ namespace Plants.Services
             });
         }
 
-        public async Task<T?> GetPageAsync<T>(int page, int pageSize, string token)
+		public async Task<T?> GetPageAsync<T>(int page, int pageSize, string token)
         {
             return await SendAsync<T>(new ApiRequest
             {
@@ -82,5 +82,26 @@ namespace Plants.Services
                 AccessToken = token
             });
         }
-    }
+
+		public async Task<T?> GetOrphanedImageLinks<T>(string token)
+		{
+			return await SendAsync<T>(new ApiRequest
+			{
+				ApiType = ApiType.GET,
+				Url = PlantsAPIBaseUrl + $"/api/plants/orphaned-imagelinks",
+				AccessToken = token
+			});
+		}
+
+		public async Task<T?> DeleteOrphanedImageLinks<T>(IEnumerable<int> ids, string token)
+		{
+			return await SendAsync<T>(new ApiRequest
+			{
+				ApiType = ApiType.DELETE,
+				Url = PlantsAPIBaseUrl + $"/api/plants/orphaned-imagelinks",
+                Data = ids,
+				AccessToken = token
+			});
+		}
+	}
 }
