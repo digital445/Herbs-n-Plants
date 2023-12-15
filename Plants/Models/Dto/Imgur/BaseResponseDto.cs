@@ -4,6 +4,5 @@
     {
         public int status { get; set; }
         public bool success { get; set; }
-        public object? data { get; set; }
     }
 }

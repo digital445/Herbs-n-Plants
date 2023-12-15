@@ -151,24 +151,23 @@ namespace Plants.Pages
 		{
 			if (files != null && files.Any())
 			{
+				//!!! try it in parallel
 				for (int i = 0; i < files.Count; i++)
 				{
 					var file = files[i];
 					if (file != null)
 					{
 						var imageResponse = await _imageService.UploadImageAsync<UploadResponseDto>(file, Token);
-						if (imageResponse != null && imageResponse.IsSuccess && imageResponse.success) //the imgur service success and the general API success are both kept in mind
+						if (imageResponse != null && imageResponse.IsSuccess && imageResponse.success && imageResponse.data != null) //the imgur service success and the general API success are both kept in mind
 						{
-							if (imageResponse.data is ImageData imageData)
+							ImageData imageData = imageResponse.data;
+							var imageLink = new ImageLinkDto
 							{
-								var imageLink = new ImageLinkDto
-								{
-									ImageUrl = imageData.link,
-									ViewType = viewTypes[i],
-									ImageServiceId = imageData.id
-								};
-								Plant.ImageLinks.Add(imageLink);
-							}
+								ImageUrl = imageData.link,
+								ViewType = viewTypes[i],
+								ImageServiceId = imageData.id
+							};
+							Plant.ImageLinks.Add(imageLink);
 						}
 					}
 				}
