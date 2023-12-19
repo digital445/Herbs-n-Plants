@@ -123,36 +123,7 @@ namespace Plants.Pages
 		{
 			string token = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
 
-			PlantDto? plant = null;
-
-			var getResponse = await _plantsService.GetAsync<ResponseDto>(plantId, token);
-			if (getResponse != null && getResponse.IsSuccess)
-			{
-				plant = JsonConvert.DeserializeObject<PlantDto>(Convert.ToString(getResponse.Result)!);
-			}
-			if (plant == null)
-			{
-				SetResultMessages(false, "Couldn't get plant from server");
-				return RedirectToPage("/ResultPage");
-			}
-
-
-			foreach (var il in plant.ImageLinks)
-			{
-				string? id = il.ImageServiceId;
-				if (id == null)
-					continue;
-				var imageResponse = await _imageService.DeleteImageAsync<DeleteResponseDto>(id, token);
-				if (imageResponse == null || !imageResponse.IsSuccess || !imageResponse.success)  //unsuccessful imageService deletion
-				{
-					il.DeleteLater = true;
-				}
-			}
-
-			//!!! сейчас данные по неудаленным из ImageStorageService изображениям просто удаляются из БД
-			// нужно модифицировать DeleteAsync так, чтобы передавать на API ImageId неудаленных ImageLinks или
-			// (лучше, но сложнее) реализовать на API отложенное удаление Images из ImageStorageService
-			var deleteResponse = await _plantsService.DeleteAsync<ResponseDto>(plantId, "");
+			var deleteResponse = await _plantsService.DeleteAsync<ResponseDto>(plantId, token);
 			HandleDeleteResponse(deleteResponse, plantId);
 
 			return RedirectToPage("/ResultPage");
