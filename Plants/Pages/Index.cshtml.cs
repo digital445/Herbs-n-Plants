@@ -162,30 +162,33 @@ namespace Plants.Pages
 		{
 			if (response == null)
 			{
-				TempData["ResultMessages"] = "No response from `plantService`.";
-				TempData["Success"] = false;
+				SetResultMessages(false, "No response from `plantService`.");
 			}
 			else if (response.IsSuccess)
 			{
 				bool responseResult = (bool)(response.Result ?? false);
 				if (responseResult)
 				{
-					TempData["ResultMessages"] = $"Plant {plantId} is successfully deleted.";
-					TempData["Success"] = true;
+					SetResultMessages(true, $"Plant {plantId} is successfully deleted.");
 				}
 				else
 				{
-					TempData["ResultMessages"] = $"Plant {plantId} was not deleted on the server side. Either plantId does not exist in the database or internal server error is occured.";
-					TempData["Success"] = false;
+					SetResultMessages(false, $"Error deleting Plant {plantId} from db");
 				}
 			}
 			else
 			{
-				response.ErrorMessages?.Insert(0, "An error occured while requesting `plantService`.");
-				TempData["ResultMessages"] = response.ErrorMessages;
-				TempData["Success"] = false;
+				string firstMessage = "An exception occured while requesting plantService.";
+				if (response.ErrorMessages != null)
+				{
+					response.ErrorMessages.Insert(0, firstMessage);
+					SetResultMessages(false, response.ErrorMessages.ToArray());
+				}
+				else
+				{
+					SetResultMessages(false, firstMessage);
+				}
 			}
-
 		}
 	}
 }
