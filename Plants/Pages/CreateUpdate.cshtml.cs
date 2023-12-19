@@ -5,6 +5,7 @@ using Plants.Models.Dto;
 using Plants.Models.Dto.Imgur;
 using static Plants.StaticDetails;
 using Plants.Pages.Shared;
+using System.Collections.Concurrent;
 
 namespace Plants.Pages
 {
@@ -149,29 +150,32 @@ namespace Plants.Pages
 		}
 		private async Task UploadImageFiles(List<IFormFile> files, List<ViewType> viewTypes)
 		{
-			if (files != null && files.Any())
+			if (files == null || !files.Any())
+				return;
+
+			var merged = files.Zip(viewTypes); //merge files with corresponding viewTypes List<(IFormFile, ViewType)>
+			var imageLinks = new ConcurrentBag<ImageLinkDto>();
+			
+			await Parallel.ForEachAsync(merged, async (item, _) =>
 			{
-				//!!! try it in parallel
-				for (int i = 0; i < files.Count; i++)
+				var (file, viewType) = item; 
+				if (file == null)
+					return;
+				var imageResponse = await _imageService.UploadImageAsync<UploadResponseDto>(file, Token);
+				if (imageResponse != null && imageResponse.IsSuccess && imageResponse.success && imageResponse.data != null) //the imgur service success and the general API success are both kept in mind
 				{
-					var file = files[i];
-					if (file != null)
+					ImageData imageData = imageResponse.data;
+					var imageLink = new ImageLinkDto
 					{
-						var imageResponse = await _imageService.UploadImageAsync<UploadResponseDto>(file, Token);
-						if (imageResponse != null && imageResponse.IsSuccess && imageResponse.success && imageResponse.data != null) //the imgur service success and the general API success are both kept in mind
-						{
-							ImageData imageData = imageResponse.data;
-							var imageLink = new ImageLinkDto
-							{
-								ImageUrl = imageData.link,
-								ViewType = viewTypes[i],
-								ImageServiceId = imageData.id
-							};
-							Plant.ImageLinks.Add(imageLink);
-						}
-					}
+						ImageUrl = imageData.link,
+						ViewType = viewType,
+						ImageServiceId = imageData.id
+					};
+					imageLinks.Add(imageLink);
 				}
-			}
+			});
+
+			Plant.ImageLinks.AddRange(imageLinks);
 		}
 
 		private bool PlantHasImages() =>
