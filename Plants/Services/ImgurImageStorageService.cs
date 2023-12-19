@@ -14,7 +14,30 @@ namespace Plants.Services
 
 		public async Task<T?> UploadImageAsync<T>(IFormFile file, string token)
 		{
-			using var formData = new MultipartFormDataContent
+			using var formDataContent = GetFormData(file);
+
+			return await SendAsync<T?>(new ApiRequest
+			{
+				ApiType = ApiType.POST,
+				Url = "https://api.imgur.com/3/upload",
+				Data = formDataContent,
+				AccessToken = token
+			});
+		}
+
+
+		public async Task<T?> DeleteImageAsync<T>(string imageServiceId, string token)
+		{
+			return await SendAsync<T?>(new ApiRequest
+			{
+				ApiType = ApiType.DELETE,
+				Url = $"https://api.imgur.com/3/image/{imageServiceId}",
+				AccessToken = token
+			});
+		}
+		private MultipartFormDataContent GetFormData(IFormFile file)
+		{
+			var formDataContent = new MultipartFormDataContent
 			{
 				{ new StringContent(albumHash), "album" },
 			};
@@ -28,24 +51,8 @@ namespace Plants.Services
 
 			var imageContent = new ByteArrayContent(byteArray);
 			imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
-			formData.Add(imageContent, "image", "image.jpg");
-
-			return await SendAsync<T?>(new ApiRequest
-			{
-				ApiType = ApiType.POST,
-				Url = "https://api.imgur.com/3/upload",
-				Data = formData,
-				AccessToken = token
-			});
-		}
-		public async Task<T?> DeleteImageAsync<T>(string imageServiceId, string token)
-		{
-			return await SendAsync<T?>(new ApiRequest
-			{
-				ApiType = ApiType.DELETE,
-				Url = $"https://api.imgur.com/3/image/{imageServiceId}",
-				AccessToken = token
-			});
+			formDataContent.Add(imageContent, "image", "image.jpg");
+			return formDataContent;
 		}
 
 
