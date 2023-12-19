@@ -12,38 +12,30 @@ namespace Plants.Services
 		private const string PsToken = "";
 
 		private readonly IServiceScopeFactory _serviceScopeFactory;
-		//private readonly IPlantsService _plantsService;
-		//private readonly IImageStorageService _imageService;
 
 		public ImageLinkCleanupService(IServiceScopeFactory serviceScopeFactory)
 		{
 			_serviceScopeFactory = serviceScopeFactory;
 		}
-		//public ImageLinkCleanupService(IPlantsService plantsService, IImageStorageService imageService)
-		//{
-		//	_plantsService = plantsService;
-		//	_imageService = imageService;
-		//}
-		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+		protected override async Task ExecuteAsync(CancellationToken stopToken)
 		{
-			while (!stoppingToken.IsCancellationRequested)
+			while (!stopToken.IsCancellationRequested)
 			{
 				try
 				{
 					// Execute cleanup task
-					await CleanupImageLinksAsync();
+					await CleanupImageLinksAsync(stopToken);
+					// Sleep for a specified interval (e.g., 24 hours)
+					await Task.Delay(TimeSpan.FromHours(24), stopToken);
 				}
 				catch (Exception ex)
 				{
-					throw;
+					//!!! log exception
 				}
-
-				// Sleep for a specified interval (e.g., 24 hours)
-				await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
 			}
 		}
 
-		private async Task CleanupImageLinksAsync()
+		private async Task CleanupImageLinksAsync(CancellationToken stopToken)
 		{
 			using var scope = _serviceScopeFactory.CreateScope();
 			var imageService = scope.ServiceProvider.GetRequiredService<IImageStorageService>();
@@ -59,16 +51,15 @@ namespace Plants.Services
 			
 			var linksDeleted = new ConcurrentBag<int>();
 
-			await Parallel.ForEachAsync(linksToDelete, 
-				async (link, stopToken) => await DeleteFromExternalStorage(link, imageService, linksDeleted));
+			await Parallel.ForEachAsync(linksToDelete, stopToken, //OperationCanceledException is thrown when token is canceled
+				async (link, stopToken) => await DeleteFromExternalStorage(link, imageService, linksDeleted, stopToken));
 			if (!linksDeleted.Any())
 				return;
 
 			var deleteResponse = await plantsService.DeleteOrphanedImageLinks<ResponseDto>(linksDeleted, PsToken);
-
 		}
 
-		private async Task DeleteFromExternalStorage(ImageLinkDto link, IImageStorageService imageService, ConcurrentBag<int> linksDeleted)
+		private async ValueTask DeleteFromExternalStorage(ImageLinkDto link, IImageStorageService imageService, ConcurrentBag<int> linksDeleted, CancellationToken stopToken)
 		{
 			if (string.IsNullOrEmpty(link.ImageServiceId))
 			{
@@ -76,6 +67,7 @@ namespace Plants.Services
 			}
 			else
 			{
+				stopToken.ThrowIfCancellationRequested();
 				var deleteImgResponse = await imageService.DeleteImageAsync<DeleteResponseDto>(link.ImageServiceId, Token);
 				if (deleteImgResponse != null && deleteImgResponse.IsSuccess && deleteImgResponse.success)
 					linksDeleted.Add(link.ImageId);
