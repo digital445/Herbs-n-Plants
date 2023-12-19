@@ -43,26 +43,17 @@ namespace Plants.Services
         }
 
         public async Task<T?> GetFilteredAsync<T>(FilterDto filter, int page, int pageSize, string token)
-        {
-            //construct URL from plantDto properties to pass them into URL as a query string
-            var uriBuilder = new UriBuilder(PlantsAPIBaseUrl + "/api/plants/filter");
-            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query.Add("page", page.ToString());
-            query.Add("pageSize", pageSize.ToString());
+		{
+            string baseUrl = PlantsAPIBaseUrl + "/api/plants/filter";
 
-            List<PropertyInfo> properties = filter.GetType().GetProperties().ToList();
-            properties.ForEach(pi => query.Add(pi.Name, pi.GetValue(filter)?.ToString()));
+			return await SendAsync<T>(new ApiRequest
+			{
+				ApiType = ApiType.GET,
+				Url = ConstructFilterUrl(baseUrl, filter, page, pageSize),
+				AccessToken = token
+			});
+		}
 
-            uriBuilder.Query = query.ToString();
-            string finalUrl = uriBuilder.ToString();
-
-            return await SendAsync<T>(new ApiRequest
-            {
-                ApiType = ApiType.GET,
-                Url = finalUrl,
-                AccessToken = token
-            });
-        }
 
 		public async Task<T?> GetPageAsync<T>(int page, int pageSize, string token)
         {
@@ -103,5 +94,23 @@ namespace Plants.Services
 				AccessToken = token
 			});
 		}
+
+		/// <summary>
+		/// Constructs URL from FilterDto properties
+		/// </summary>
+		private string ConstructFilterUrl(string baseUrl, FilterDto filter, int page, int pageSize)
+		{
+			var uriBuilder = new UriBuilder(baseUrl);
+			var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+			query.Add("page", page.ToString());
+			query.Add("pageSize", pageSize.ToString());
+
+			List<PropertyInfo> properties = filter.GetType().GetProperties().ToList();
+			properties.ForEach(pi => query.Add(pi.Name, pi.GetValue(filter)?.ToString()));
+
+			uriBuilder.Query = query.ToString();
+			return uriBuilder.ToString();
+		}
+
 	}
 }
