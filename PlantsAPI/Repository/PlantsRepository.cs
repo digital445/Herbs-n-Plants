@@ -60,18 +60,16 @@ namespace Services.PlantsAPI.Repository
 		{
 			try
 			{
-				Plant? plant = await _db.Plants.Include(pl => pl.ImageLinks)
-					.AsNoTracking()
+				Plant? plant = await _db.Plants
+					.Include(pl => pl.Names)
+					.Include(pl => pl.ImageLinks)
 					.FirstOrDefaultAsync(plant => plant.PlantId == plantId);
 				if (plant == null)
 				{
 					return false;
 				}
 
-				var imageLinksToDeleteNow = plant.ImageLinks.Where(il => !il.DeleteLater).ToList(); 
-
-				_db.Plants.Remove(plant); //deletes Plant and related Names, doesn't delete ImageLinks, but cuts their connection to the Plant
-				_db.ImageLink.RemoveRange(imageLinksToDeleteNow);
+				_db.Plants.Remove(plant); //deletes Plant and related Names, doesn't delete ImageLinks, but unbinds it from the Plant
 				
 				await _db.SaveChangesAsync();
 				return true;

@@ -16,7 +16,6 @@ namespace Services.PlantsAPI.Models
 		[Required]
 		public string? ImageUrl { get; set; }
 		public string? ImageServiceId { get; set; }
-		public bool DeleteLater { get; set; } = false;
 		[Required]
 		[Column(TypeName = "integer")]
 		public ViewType ViewType { get; set; }
