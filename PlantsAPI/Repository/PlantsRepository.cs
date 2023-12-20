@@ -37,18 +37,18 @@ namespace Services.PlantsAPI.Repository
 			}
 			else
 			{
-				//first clear existing Names and ImageLinks
+				//delete old PlantNames for existingPlant
 				existingPlant.Names.ForEach(pn => pn.Plant = null); //cut ties with the parent plant to prevent tracking all related entities
 				_db.PlantNames.RemoveRange(existingPlant.Names);
-				existingPlant.ImageLinks.ForEach(il => il.Plant = null);
-				_db.ImageLink.RemoveRange(existingPlant.ImageLinks);
 
+				//unbind obsolete imageLinks from their plant, so that links become orphaned and will be deleted by a separate service
+				var linksToUnbind = existingPlant.ImageLinks
+									.Except(plant.ImageLinks, new ImageLink.IdComparer()).ToList();
+				linksToUnbind.ForEach(il => { il.PlantId = null; il.Plant = null; });	
+				_db.ImageLink.UpdateRange(linksToUnbind);
+
+				//update the plant in db with new values including Names and ImageLinks
 				_db.Plants.Update(plant);
-
-				//update ImageLinks marked for delayed deletion
-				var imageLinksToDeleteLater = plant.ImageLinks.Where(il => il.DeleteLater).ToList(); //get imageLinks marked to delete them later
-				imageLinksToDeleteLater.ForEach(il => il.PlantId = null); //cut the relationship with the plant
-				_db.ImageLink.UpdateRange(imageLinksToDeleteLater);
 			}
 
 			await _db.SaveChangesAsync();

@@ -20,5 +20,19 @@ namespace Services.PlantsAPI.Models
 		[Required]
 		[Column(TypeName = "integer")]
 		public ViewType ViewType { get; set; }
+
+		public class IdComparer : IEqualityComparer<ImageLink>
+		{
+			public bool Equals(ImageLink? x, ImageLink? y)
+			{
+				return x != null && y != null && x.ImageId == y.ImageId;
+			}
+
+			public int GetHashCode([DisallowNull] ImageLink obj)
+			{
+				return obj.ImageId;
+			}
+		}
+
 	}
 }

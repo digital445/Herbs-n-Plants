@@ -63,21 +63,13 @@ namespace Plants.Pages
 			{
 				var plantResponse = await _plantsService.GetAsync<ResponseDto>(plantId, "");
 				if (plantResponse != null && plantResponse.IsSuccess)
-				{
-					string json = Convert.ToString(plantResponse.Result) ?? string.Empty;
-					Plant = JsonConvert.DeserializeObject<PlantDto>(json) ?? Plant;
-
-					//save server response
-					TempData["dbPlant"] = json;
-					return Page();
-				}
+					Plant = JsonConvert.DeserializeObject<PlantDto>(Convert.ToString(plantResponse.Result)!) ?? Plant;
 				else
 				{
 					SetResultMessages(false, "No plant data was received from server");
 					return RedirectToPage("/ResultPage");
 				}
 			}
-			TempData["dbPlant"] = null;
 			return Page();
 		}
 		public async Task<IActionResult> OnPost(List<IFormFile> files, List<ViewType> viewTypes)
@@ -85,8 +77,6 @@ namespace Plants.Pages
 			try
 			{
 				ValidatePlant(files.Count);
-
-				await DeleteImagesFromStorage();
 
 				await UploadImageFiles(files, viewTypes);
 				HandleUpload();
@@ -106,33 +96,7 @@ namespace Plants.Pages
 			}
 		}
 #region Private
-		private async Task DeleteImagesFromStorage()
-		{
-			string? json = (string?)TempData["dbPlant"];
-			if (string.IsNullOrEmpty(json))
-				return;
-			PlantDto? dbPlant = JsonConvert.DeserializeObject<PlantDto>(json);
-			if (dbPlant == null)
-				return;
-			var imageLinksToDelete = dbPlant.ImageLinks
-				.Except(Plant.ImageLinks, new ImageLinkDto.IdComparer());
-
-			foreach (var il in imageLinksToDelete)
-			{
-				if (string.IsNullOrEmpty(il.ImageServiceId))
-				{
-					continue;
-				}
-				var deleteResponse = await _imageService.DeleteImageAsync<DeleteResponseDto>(il.ImageServiceId, Token);
-				if (deleteResponse == null || !deleteResponse.IsSuccess || !deleteResponse.success)
-				{
-					//mark as deleted for further deletion
-					il.DeleteLater = true;
-					Plant.ImageLinks.Add(il);
-				}
-			}
-		}
-		private void ValidatePlant(int newImagesCount)
+		private void ValidatePlant(int newImagesNumber)
 		{
 			//plant names validation
 			var notEmptyNames = Plant.Names.Where(pn => !string.IsNullOrWhiteSpace(pn.Name)).ToList();
@@ -143,7 +107,7 @@ namespace Plants.Pages
 			Plant.Names = notEmptyNames;
 
 			//number of images validation
-			if (newImagesCount + Plant.ImageLinks.Count == 0)
+			if (newImagesNumber + Plant.ImageLinks.Count == 0)
 			{
 				throw new Exception("Plant with no images cannot be created or updated!");
 			}
@@ -178,8 +142,6 @@ namespace Plants.Pages
 			Plant.ImageLinks.AddRange(imageLinks);
 		}
 
-		private bool PlantHasImages() =>
-			Plant.ImageLinks.Any(il => !string.IsNullOrWhiteSpace(il.ImageUrl));
 
 		private void HandleResponse(ResponseDto? response)
 		{
@@ -205,6 +167,8 @@ namespace Plants.Pages
 				}
 			}
 		}
+		private bool PlantHasImages() =>
+			Plant.ImageLinks.Any(il => !string.IsNullOrWhiteSpace(il.ImageUrl));
 		private void HandleUpload()
 		{
 			if (!PlantHasImages())
