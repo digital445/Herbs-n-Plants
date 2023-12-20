@@ -155,7 +155,7 @@ namespace Plants.Pages
 			}
 			else
 			{
-				SetResultMessages(false, "An exception has happened while requesting plantService.", response.ErrorMessages?.ToArray());
+				SetResultMessages(false, "An exception has happened while requesting plantService.", response.ErrorMessages);
 			}
 		}
 		private bool PlantHasImages() =>

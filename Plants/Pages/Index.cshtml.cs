@@ -149,7 +149,7 @@ namespace Plants.Pages
 			}
 			else
 			{
-				SetResultMessages(false, "An exception occured while requesting plantService.", response.ErrorMessages?.ToArray());
+				SetResultMessages(false, "An exception occured while requesting plantService.", response.ErrorMessages);
 			}
 		}
 	}
