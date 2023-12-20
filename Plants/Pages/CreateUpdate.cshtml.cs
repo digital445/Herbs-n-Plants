@@ -91,7 +91,7 @@ namespace Plants.Pages
 				SetResultMessages(false,
 					"An exception occured while creating the Plant.",
 					ex.Message,
-					ex.InnerException?.Message ?? "");
+					ex.InnerException?.Message);
 				return RedirectToPage("/ResultPage");
 			}
 		}
@@ -155,16 +155,7 @@ namespace Plants.Pages
 			}
 			else
 			{
-				string firstMessage = "An exception has happened while requesting plantService.";
-				if (response.ErrorMessages != null)
-				{
-					response.ErrorMessages.Insert(0, firstMessage);
-					SetResultMessages(false, response.ErrorMessages.ToArray());
-				}
-				else
-				{
-					SetResultMessages(false, firstMessage);
-				}
+				SetResultMessages(false, "An exception has happened while requesting plantService.", response.ErrorMessages?.ToArray());
 			}
 		}
 		private bool PlantHasImages() =>
