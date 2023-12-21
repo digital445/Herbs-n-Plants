@@ -9,10 +9,11 @@ namespace Plants.Pages.Shared
 			TempData["ResultMessages"] = string.Join(Environment.NewLine, messages);
 			TempData["Success"] = wasSuccess;
 		}
-		protected void SetResultMessages(bool wasSuccess, string firstMessage, List<string>? messages)
+		protected void SetResultMessages(bool wasSuccess, string firstMessage, IEnumerable<string>? messages)
 		{
-			messages?.Insert(0, firstMessage);
-			TempData["ResultMessages"] = (messages == null) ? firstMessage : string.Join(Environment.NewLine, messages);
+			string messagesString = (messages == null) ? string.Empty : string.Join(Environment.NewLine, messages);
+			
+			TempData["ResultMessages"] = firstMessage + Environment.NewLine + messagesString;
 			TempData["Success"] = wasSuccess;
 		}
 	}
