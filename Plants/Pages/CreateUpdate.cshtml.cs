@@ -11,6 +11,17 @@ namespace Plants.Pages
 {
 	public class CreateUpdateModel : BasePageModel
 	{
+		private readonly IImageStorageService _imageService;
+		private readonly IPlantsService _plantsService;
+		private List<ColorDto>? _palette;
+
+		private const string imgToken = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
+		private const string psToken = "";
+
+		[BindProperty]
+		public PlantDto Plant { get; set; }
+		public List<ColorDto>? Palette { get => _palette; }
+
 		public CreateUpdateModel(IImageStorageService imageService, IPlantsService plantsService)
 		{
 			_imageService = imageService;
@@ -18,50 +29,13 @@ namespace Plants.Pages
 			Plant = new PlantDto();
 			Plant.Names.Add(new PlantNameDto());
 		}
-		private readonly IImageStorageService _imageService;
-		private readonly IPlantsService _plantsService;
-
-
-		[BindProperty]
-		public PlantDto Plant { get; set; }
-		private List<ColorDto>? _palette;
-
-		/// <summary>
-		///gets the Palette either from the Session or from the PlantService
-		/// </summary>
-		public List<ColorDto>? Palette
-		{
-			get
-			{
-				if (_palette == null && HttpContext.Session.IsAvailable)
-				{
-					string? json = HttpContext.Session.GetString("palette");
-					if (string.IsNullOrEmpty(json)) //if Session does not contain the palette
-					{
-						var paletteResponse = _plantsService.GetPaletteAsync<ResponseDto>("").Result; //??? Is DeadLock possible?
-						if (paletteResponse != null && paletteResponse.IsSuccess)
-						{
-							json = Convert.ToString(paletteResponse.Result);
-							if (!string.IsNullOrEmpty(json))
-							{
-								HttpContext.Session.SetString("palette", json); //save palette to session
-							}
-						}
-
-					}
-					_palette = string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<IEnumerable<ColorDto>>(json)?.ToList();
-				}
-				return _palette;
-			}
-		}
-
-		private const string Token = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
-
 		public async Task<IActionResult> OnGet(int plantId = 0)
 		{
+			await RefreshPalette();
+
 			if (plantId > 0) //Plant update is coming
 			{
-				var plantResponse = await _plantsService.GetAsync<ResponseDto>(plantId, "");
+				var plantResponse = await _plantsService.GetAsync<ResponseDto>(plantId, psToken);
 				if (plantResponse != null && plantResponse.IsSuccess)
 					Plant = JsonConvert.DeserializeObject<PlantDto>(Convert.ToString(plantResponse.Result)!) ?? Plant;
 				else
@@ -81,7 +55,7 @@ namespace Plants.Pages
 				await UploadImageFiles(files, viewTypes);
 				HandleUpload();
 
-				var psResponse = await _plantsService.CreateUpdateAsync<ResponseDto>(Plant, "");
+				var psResponse = await _plantsService.CreateUpdateAsync<ResponseDto>(Plant, psToken);
 				HandleResponse(psResponse);
 
 				return RedirectToPage("/ResultPage");
@@ -95,7 +69,33 @@ namespace Plants.Pages
 				return RedirectToPage("/ResultPage");
 			}
 		}
-#region Private
+		#region Private
+		/// <summary>
+		///Sets the palette value by retrieving it from either the page session or the database.
+		/// </summary>
+		private async Task RefreshPalette()
+		{
+			if (_palette == null && HttpContext.Session.IsAvailable)
+			{
+				string? json = HttpContext.Session.GetString("palette");
+				if (string.IsNullOrEmpty(json)) //if Session does not contain the palette
+				{
+					var paletteResponse = await _plantsService.GetPaletteAsync<ResponseDto>(psToken);
+					if (paletteResponse != null && paletteResponse.IsSuccess)
+					{
+						json = Convert.ToString(paletteResponse.Result);
+						if (!string.IsNullOrEmpty(json))
+						{
+							HttpContext.Session.SetString("palette", json); //save palette to session
+						}
+					}
+				}
+
+				_palette = string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<IEnumerable<ColorDto>>(json)?.ToList();
+			}
+		}
+
+
 		private void ValidatePlant(int newImagesNumber)
 		{
 			//plant names validation
@@ -125,7 +125,7 @@ namespace Plants.Pages
 				var (file, viewType) = item; 
 				if (file == null)
 					return;
-				var imageResponse = await _imageService.UploadImageAsync<UploadResponseDto>(file, Token);
+				var imageResponse = await _imageService.UploadImageAsync<UploadResponseDto>(file, imgToken);
 				if (imageResponse != null && imageResponse.IsSuccess && imageResponse.success && imageResponse.data != null) //the imgur service success and the general API success are both kept in mind
 				{
 					ImageData imageData = imageResponse.data;
