@@ -1,15 +1,14 @@
-﻿using Newtonsoft.Json;
-using Plants.Models.Dto;
-using Plants.Models.Dto.Imgur;
-using Plants.Services.IServices;
+﻿using Services.PlantsAPI.Models.Dto;
+using Services.PlantsAPI.Models.Dto.Imgur;
+using Services.PlantsAPI.Repository;
+using Services.PlantsAPI.Services.IServices;
 using System.Collections.Concurrent;
 
-namespace Plants.Services
+namespace Services.PlantsAPI.Services
 {
 	public class ImageLinkCleanupService : BackgroundService
 	{
 		private const string Token = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
-		private const string PsToken = "";
 
 		private readonly IServiceScopeFactory _serviceScopeFactory;
 
@@ -37,18 +36,15 @@ namespace Plants.Services
 
 		private async Task CleanupImageLinksAsync(CancellationToken stopToken)
 		{
+			//create a scoped context inside the singleton service
 			using var scope = _serviceScopeFactory.CreateScope();
 			var imageService = scope.ServiceProvider.GetRequiredService<IImageStorageService>();
-			var plantsService = scope.ServiceProvider.GetRequiredService<IPlantsService>();
+			var plantsRepository = scope.ServiceProvider.GetRequiredService<IPlantsRepository>();
 
-			var getResponse = await plantsService.GetOrphanedImageLinks<ResponseDto>(PsToken);
-			if (getResponse == null || !getResponse.IsSuccess)
+			IEnumerable<ImageLinkDto> linksToDelete = await plantsRepository.GetOrphanedImageLinks();
+			if (!linksToDelete.Any())
 				return;
 
-			IEnumerable<ImageLinkDto>? linksToDelete = JsonConvert.DeserializeObject<IEnumerable<ImageLinkDto>>(Convert.ToString(getResponse.Result)!);
-			if (linksToDelete == null || !linksToDelete.Any())
-				return;
-			
 			var linksDeleted = new ConcurrentBag<int>();
 
 			await Parallel.ForEachAsync(linksToDelete, stopToken, //OperationCanceledException is thrown when token is canceled
@@ -56,7 +52,7 @@ namespace Plants.Services
 			if (!linksDeleted.Any())
 				return;
 
-			var deleteResponse = await plantsService.DeleteOrphanedImageLinks<ResponseDto>(linksDeleted, PsToken);
+			await plantsRepository.DeleteOrphanedImageLinks(linksDeleted);
 		}
 
 		private async ValueTask DeleteFromExternalStorage(ImageLinkDto link, IImageStorageService imageService, ConcurrentBag<int> linksDeleted, CancellationToken stopToken)

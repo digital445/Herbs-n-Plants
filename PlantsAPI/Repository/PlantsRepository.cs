@@ -41,10 +41,10 @@ namespace Services.PlantsAPI.Repository
 				existingPlant.Names.ForEach(pn => pn.Plant = null); //cut ties with the parent plant to prevent tracking all related entities
 				_db.PlantNames.RemoveRange(existingPlant.Names);
 
-				//unbind obsolete imageLinks from their plant, so that links become orphaned and will be deleted by a separate service
+				//unbind obsolete imageLinks from their plant, so that links become orphaned and will be deleted later
 				var linksToUnbind = existingPlant.ImageLinks
 									.Except(plant.ImageLinks, new ImageLink.IdComparer()).ToList();
-				linksToUnbind.ForEach(il => { il.PlantId = null; il.Plant = null; });	
+				linksToUnbind.ForEach(il => il.UnBindPlant());	
 				_db.ImageLink.UpdateRange(linksToUnbind);
 
 				//update the plant in db with new values including Names and ImageLinks
@@ -69,13 +69,14 @@ namespace Services.PlantsAPI.Repository
 					return false;
 				}
 
-				_db.Plants.Remove(plant); //deletes Plant and related Names, doesn't delete ImageLinks, but unbinds it from the Plant
+				_db.Plants.Remove(plant); //deletes Plant and related Names, doesn't delete ImageLinks, but unbinds it from the Plant (ImageId is nullable)
 				
 				await _db.SaveChangesAsync();
 				return true;
 			}
 			catch (Exception)
 			{
+				//!!! log exception
 				return false;
 			}
 		}
@@ -155,7 +156,7 @@ namespace Services.PlantsAPI.Repository
 		public async Task DeleteOrphanedImageLinks(IEnumerable<int> ids)
 		{
 			var linksToDelete = await _db.ImageLink.Where(il => ids.Contains(il.ImageId)).ToListAsync();
-			_db.RemoveRange(linksToDelete);
+			_db.ImageLink.RemoveRange(linksToDelete);
 			await _db.SaveChangesAsync();
 		}
 

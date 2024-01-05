@@ -10,7 +10,5 @@ namespace Plants.Services.IServices
         Task<T?> CreateUpdateAsync<T>(PlantDto plantDto, string token);
         Task<T?> DeleteAsync<T>(int id, string token);
         Task<T?> GetPaletteAsync<T>(string token);
-        Task<T?> GetOrphanedImageLinks<T>(string token);
-        Task<T?> DeleteOrphanedImageLinks<T>(IEnumerable<int> ids, string token);
 	}
 }

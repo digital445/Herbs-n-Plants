@@ -2,6 +2,14 @@
 {
 	public static class StaticDetails
 	{
+		public enum ApiType
+		{
+			GET,
+			POST,
+			PUT,
+			DELETE
+		}
+
 		/// <summary>
 		/// Type of View represented on the Image
 		/// </summary>

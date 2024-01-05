@@ -20,6 +20,12 @@ namespace Services.PlantsAPI.Models
 		[Column(TypeName = "integer")]
 		public ViewType ViewType { get; set; }
 
+		public void UnBindPlant()
+		{
+			Plant = null;
+			PlantId = null;
+		}
+
 		public class IdComparer : IEqualityComparer<ImageLink>
 		{
 			public bool Equals(ImageLink? x, ImageLink? y)

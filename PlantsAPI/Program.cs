@@ -5,6 +5,8 @@ using Microsoft.OpenApi.Models;
 using Services.PlantsAPI;
 using Services.PlantsAPI.DbContexts;
 using Services.PlantsAPI.Repository;
+using Services.PlantsAPI.Services;
+using Services.PlantsAPI.Services.IServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +37,10 @@ builder.Services.AddAuthorization(options =>
 		policy.RequireClaim("scope", "ApiAccess");
 	});
 });
+
+builder.Services.AddHttpClient<IImageStorageService, ImgurImageStorageService>();
+builder.Services.AddScoped<IImageStorageService, ImgurImageStorageService>();
+builder.Services.AddHostedService<ImageLinkCleanupService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -74,27 +74,6 @@ namespace Plants.Services
             });
         }
 
-		public async Task<T?> GetOrphanedImageLinks<T>(string token)
-		{
-			return await SendAsync<T>(new ApiRequest
-			{
-				ApiType = ApiType.GET,
-				Url = PlantsAPIBaseUrl + $"/api/plants/orphaned-imagelinks",
-				AccessToken = token
-			});
-		}
-
-		public async Task<T?> DeleteOrphanedImageLinks<T>(IEnumerable<int> ids, string token)
-		{
-			return await SendAsync<T>(new ApiRequest
-			{
-				ApiType = ApiType.DELETE,
-				Url = PlantsAPIBaseUrl + $"/api/plants/orphaned-imagelinks",
-                Data = ids,
-				AccessToken = token
-			});
-		}
-
 		/// <summary>
 		/// Constructs URL from FilterDto properties
 		/// </summary>

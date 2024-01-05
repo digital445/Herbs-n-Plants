@@ -127,38 +127,5 @@ namespace Services.PlantsAPI.Controllers
 			}
 			return _response;
 		}
-
-		[HttpGet]
-		[Route("orphaned-imagelinks")]
-		public async Task<object> GetOrphanedImageLinks()
-		{
-			try
-			{
-				IEnumerable<ImageLinkDto> orphanedImageLinks = await _plantsRepository.GetOrphanedImageLinks();
-				_response.Result = orphanedImageLinks;
-			}
-			catch (Exception ex)
-			{
-				_response.IsSuccess = false;
-				_response.ErrorMessages = new List<string> { ex.Message };
-			}
-			return _response;
-		}
-
-		[HttpDelete]
-		[Route("orphaned-imagelinks")]
-		public async Task<object> DeleteOrphanedImageLinks([FromBody] IEnumerable<int> ids)
-		{
-			try
-			{
-				await _plantsRepository.DeleteOrphanedImageLinks(ids);
-			}
-			catch (Exception ex)
-			{
-				_response.IsSuccess = false;
-				_response.ErrorMessages = new List<string> { ex.Message };
-			}
-			return _response;
-		}
 	}
 }
