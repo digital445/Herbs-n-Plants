@@ -14,7 +14,7 @@ namespace Plants.Services
 
 		public async Task<T?> UploadImageAsync<T>(IFormFile file, string token)
 		{
-			using var formDataContent = GetFormData(file);
+			using var formDataContent = CreateFormData(file);
 
 			return await SendAsync<T?>(new ApiRequest
 			{
@@ -35,7 +35,7 @@ namespace Plants.Services
 				AccessToken = token
 			});
 		}
-		private MultipartFormDataContent GetFormData(IFormFile file)
+		private MultipartFormDataContent CreateFormData(IFormFile file)
 		{
 			var formDataContent = new MultipartFormDataContent
 			{

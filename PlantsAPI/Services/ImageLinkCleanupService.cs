@@ -64,8 +64,8 @@ namespace Services.PlantsAPI.Services
 			else
 			{
 				stopToken.ThrowIfCancellationRequested();
-				var deleteImgResponse = await imageService.DeleteImageAsync<DeleteResponseDto>(link.ImageServiceId, Token);
-				if (deleteImgResponse != null && deleteImgResponse.IsSuccess && deleteImgResponse.success)
+				var deleteImgResponse = await imageService.DeleteImageAsync<ImgurResponseDto>(link.ImageServiceId, Token);
+				if (deleteImgResponse != null && deleteImgResponse.success)
 					linksDeleted.Add(link.ImageId);
 			}
 		}

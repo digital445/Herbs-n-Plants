@@ -63,7 +63,6 @@ namespace Services.PlantsAPI.Services
 				var response = new ResponseDto()
 				{
 					IsSuccess = false,
-					DisplayMessage = "Error",
 					ErrorMessages = new List<string>() { ex.Message }
 				};
 				var res = JsonConvert.SerializeObject(response);

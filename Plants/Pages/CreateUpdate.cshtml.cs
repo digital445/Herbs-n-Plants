@@ -119,16 +119,18 @@ namespace Plants.Pages
 
 			var merged = files.Zip(viewTypes); //merge files with corresponding viewTypes List<(IFormFile, ViewType)>
 			var imageLinks = new ConcurrentBag<ImageLinkDto>();
-			
+
 			await Parallel.ForEachAsync(merged, async (item, _) =>
 			{
-				var (file, viewType) = item; 
+				var (file, viewType) = item;
 				if (file == null)
 					return;
-				var imageResponse = await _imageService.UploadImageAsync<UploadResponseDto>(file, imgToken);
-				if (imageResponse != null && imageResponse.IsSuccess && imageResponse.success && imageResponse.data != null) //the imgur service success and the general API success are both kept in mind
+				var imageResponse = await _imageService.UploadImageAsync<ImgurResponseDto>(file, imgToken);
+				if (imageResponse != null && imageResponse.success && imageResponse.data != null)
 				{
-					ImageData imageData = imageResponse.data;
+					ImageDataDto? imageData = JsonConvert.DeserializeObject<ImageDataDto>(Convert.ToString(imageResponse.data)!);
+					if (imageData == null)
+						return;
 					var imageLink = new ImageLinkDto
 					{
 						ImageUrl = imageData.link,
@@ -166,6 +168,6 @@ namespace Plants.Pages
 				throw new Exception("Plant with no images cannot be created or updated.");
 		}
 
-#endregion
+		#endregion
 	}
 }

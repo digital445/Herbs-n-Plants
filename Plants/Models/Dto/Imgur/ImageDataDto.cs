@@ -1,11 +1,6 @@
-﻿namespace Services.PlantsAPI.Models.Dto.Imgur
+﻿namespace Plants.Models.Dto.Imgur
 {
-    public class UploadResponseDto : BaseResponseDto
-    {
-        public ImageData? data { get; set; }
-    }
-
-    public class ImageData
+    public class ImageDataDto
     {
         public string? id { get; set; }
         public string? deletehash { get; set; }
