@@ -6,6 +6,9 @@ using Plants.Services.IServices;
 
 namespace Plants.Pages
 {
+	/// <summary>
+	/// The PageModel for the Index Page, which displays requested plants
+	/// </summary>
 	public class IndexModel : BasePageModel
 	{
 		private readonly IPlantsService _plantsService;
@@ -70,6 +73,9 @@ namespace Plants.Pages
 				}
 			}
 		}
+		/// <summary>
+		/// Processes the POST request which contains the filter conditions
+		/// </summary>
 		public async Task OnPost()
 		{
 			await RefreshPalette();
@@ -87,19 +93,10 @@ namespace Plants.Pages
 			}
 		}
 
-
-		public async Task<IActionResult> OnPostDelete(int plantId)
-		{
-			var deleteResponse = await _plantsService.DeleteAsync<ResponseDto>(plantId, psToken);
-			HandleDeleteResponse(deleteResponse, plantId);
-
-			return RedirectToPage("/ResultPage");
-		}
-
 	#region Private
 
 		/// <summary>
-		///Sets the palette value by retrieving it from either the page session or the database.
+		/// Sets the palette value by retrieving it from either the page session or the database.
 		/// </summary>
 		private async Task RefreshPalette()
 		{
@@ -114,7 +111,7 @@ namespace Plants.Pages
 						json = Convert.ToString(paletteResponse.Result);
 						if (!string.IsNullOrEmpty(json))
 						{
-							HttpContext.Session.SetString("palette", json); //save palette to session
+							HttpContext.Session.SetString("palette", json); //save palette to session //!!!вынести строки в константы
 						}
 					}
 				}
@@ -122,32 +119,15 @@ namespace Plants.Pages
 				_palette = string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<IEnumerable<ColorDto>>(json)?.ToList();
 			}
 		}
-		private void ResetFilter() => HttpContext.Session.Remove("filter"); //removes the filter from the page session
+		/// <summary>
+		/// Removes the filter from the page session
+		/// </summary>
+		private void ResetFilter() => HttpContext.Session.Remove("filter");
+		/// <summary>
+		/// Saves the filter to the page session state
+		/// </summary>
 		private void SaveFilter() =>
-			HttpContext.Session.SetString("filter", JsonConvert.SerializeObject(Filter)); //saves the filter to the page session state
-		private void HandleDeleteResponse(ResponseDto? response, int plantId)
-		{
-			if (response == null)
-			{
-				SetResultMessages(false, "No response from `plantService`.");
-			}
-			else if (response.IsSuccess)
-			{
-				bool responseResult = (bool)(response.Result ?? false);
-				if (responseResult)
-				{
-					SetResultMessages(true, $"Plant {plantId} is successfully deleted.");
-				}
-				else
-				{
-					SetResultMessages(false, $"Error deleting Plant {plantId} from db");
-				}
-			}
-			else
-			{
-				SetResultMessages(false, "An exception occured while requesting plantService.", response.ErrorMessages);
-			}
-		}
+			HttpContext.Session.SetString("filter", JsonConvert.SerializeObject(Filter));
 	#endregion
 	}
 }

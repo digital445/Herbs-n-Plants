@@ -127,11 +127,7 @@
 										</div>
 										<div class="col-3 d-flex flex-column">
 											<a class="btn btn-primary mt-auto mb-1" href=@(Model.NotAuthorized ? $"/Details/{plant.PlantId}" : $"/CreateUpdate/{plant.PlantId}")>Details</a>
-
-											<form method="POST" asp-page-handler="Delete" onsubmit="return confirm('Are you sure you want to delete this product?')" hidden=@Model.NotAuthorized>
-												<input type="hidden" name="plantId" value="@plant.PlantId" />
-												<button type="submit" class="btn btn-danger mt-auto">Delete</button>
-											</form>
+											<a class="btn btn-danger mt-auto" href=@($"/Delete/{plant.PlantId}") @(Model.NotAuthorized ? "hidden" : "") onclick="return confirmDelete();">Delete</a>
 										</div>
 									</div>
 								</div>
@@ -169,3 +165,8 @@
 		</nav>
 	</div>
 </div>
+<script>
+	function confirmDelete() {
+        return confirm("Are you sure you want to delete this plant?");
+    }
+</script>
