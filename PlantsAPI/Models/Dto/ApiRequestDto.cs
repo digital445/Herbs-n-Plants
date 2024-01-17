@@ -1,10 +1,10 @@
 ﻿using static Services.PlantsAPI.StaticDetails;
 
-namespace Services.PlantsAPI.Models
+namespace Services.PlantsAPI.Models.Dto
 {
-	public class ApiRequest
-	{
-		public ApiType ApiType { get; set; } = ApiType.GET;
+    public class ApiRequestDto
+    {
+        public ApiType ApiType { get; set; } = ApiType.GET;
         public string Url { get; set; } = ""; //адрес, на который отсылается ApiRequest
         public object? Data { get; set; }
         public string AccessToken { get; set; } = "";

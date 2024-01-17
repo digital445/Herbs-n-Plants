@@ -1,5 +1,4 @@
-﻿using Services.PlantsAPI.Models;
-using Services.PlantsAPI.Models.Dto;
+﻿using Services.PlantsAPI.Models.Dto;
 using Services.PlantsAPI.Services.IServices;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
@@ -7,7 +6,7 @@ using System.Text;
 
 namespace Services.PlantsAPI.Services
 {
-	public class BaseService : IBaseService
+    public class BaseService : IBaseService
 	{
 		private readonly IHttpClientFactory _httpClientFactory;
 
@@ -16,7 +15,7 @@ namespace Services.PlantsAPI.Services
             _httpClientFactory = httpClientFactory;
 		}
 
-		public async Task<T?> SendAsync<T>(ApiRequest apiRequest)
+		public async Task<T?> SendAsync<T>(ApiRequestDto apiRequest)
 		{
 			try
 			{

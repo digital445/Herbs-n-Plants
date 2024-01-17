@@ -1,9 +1,9 @@
-﻿using Services.PlantsAPI.Models;
+﻿using Services.PlantsAPI.Models.Dto;
 
 namespace Services.PlantsAPI.Services.IServices
 {
-	public interface IBaseService : IDisposable
+    public interface IBaseService : IDisposable
 	{
-		Task<T?> SendAsync<T>(ApiRequest apiRequest);
+		Task<T?> SendAsync<T>(ApiRequestDto apiRequest);
 	}
 }

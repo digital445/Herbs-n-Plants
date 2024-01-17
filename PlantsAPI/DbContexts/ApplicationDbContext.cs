@@ -27,7 +27,6 @@ namespace Services.PlantsAPI.DbContexts
 				{
 
 					PlantId = 1,
-					//Names = { aconit, borets },
 					FlowerColorCode = 6490276,
 					Poisonous = true,
 					ForHerbalTea = false,
@@ -36,7 +35,6 @@ namespace Services.PlantsAPI.DbContexts
 				new Plant
 				{
 					PlantId = 2,
-					//Names = { dushitsa },
 					FlowerColorCode = 14298317,
 					Poisonous = false,
 					ForHerbalTea = true,
