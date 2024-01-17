@@ -17,6 +17,7 @@ namespace Plants.Pages
 
 		private const string imgToken = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
 		private const string psToken = "";
+		private const string paletteSessionKey = "palette"; //the key to store palette in the page session
 
 		[BindProperty]
 		public PlantDto Plant { get; set; }
@@ -36,7 +37,7 @@ namespace Plants.Pages
 			if (plantId > 0) //Plant update is coming
 			{
 				var plantResponse = await _plantsService.GetAsync<ResponseDto>(plantId, psToken);
-				if (plantResponse != null && plantResponse.IsSuccess)
+				if (plantResponse?.IsSuccess == true)
 					Plant = JsonConvert.DeserializeObject<PlantDto>(Convert.ToString(plantResponse.Result)!) ?? Plant;
 				else
 				{
@@ -77,7 +78,7 @@ namespace Plants.Pages
 		{
 			if (_palette == null && HttpContext.Session.IsAvailable)
 			{
-				string? json = HttpContext.Session.GetString("palette");
+				string? json = HttpContext.Session.GetString(paletteSessionKey);
 				if (string.IsNullOrEmpty(json)) //if Session does not contain the palette
 				{
 					var paletteResponse = await _plantsService.GetPaletteAsync<ResponseDto>(psToken);
@@ -86,7 +87,7 @@ namespace Plants.Pages
 						json = Convert.ToString(paletteResponse.Result);
 						if (!string.IsNullOrEmpty(json))
 						{
-							HttpContext.Session.SetString("palette", json); //save palette to session
+							HttpContext.Session.SetString(paletteSessionKey, json); //save palette to session
 						}
 					}
 				}
@@ -153,7 +154,8 @@ namespace Plants.Pages
 			}
 			else if (response.IsSuccess)
 			{
-				SetResultMessages(true, "Plant is successfully created.");
+				string stringResult = Plant.PlantId > 0 ? "updated" : "created";
+				SetResultMessages(true, $"Plant is successfully {stringResult}.");
 			}
 			else
 			{

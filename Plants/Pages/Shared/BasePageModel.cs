@@ -2,6 +2,9 @@
 
 namespace Plants.Pages.Shared
 {
+	/// <summary>
+	/// This class extends PageModel class to provide common functionality for its inheritors
+	/// </summary>
 	public abstract class BasePageModel : PageModel
 	{
 		protected void SetResultMessages(bool wasSuccess, params string?[] messages)

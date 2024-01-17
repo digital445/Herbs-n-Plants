@@ -16,6 +16,8 @@ namespace Plants.Pages
 		private List<ColorDto>? _palette;
 
 		private const string psToken = "";
+		private const string paletteSessionKey = "palette"; //the key to store the palette in the page session
+		private const string filterSessionKey = "filter"; //the key to store the filter in the page session
 		private readonly int pageSize = 3;
 
 		public int TotalCount { get; set; }
@@ -36,7 +38,7 @@ namespace Plants.Pages
 			{
 				if (_filter == null && HttpContext.Session.IsAvailable)
 				{
-					string? json = HttpContext.Session.GetString("filter");
+					string? json = HttpContext.Session.GetString(filterSessionKey);
 					_filter = string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<FilterDto>(json);
 				}
 				return _filter ??= new FilterDto();
@@ -102,7 +104,7 @@ namespace Plants.Pages
 		{
 			if (_palette == null && HttpContext.Session.IsAvailable)
 			{
-				string? json = HttpContext.Session.GetString("palette");
+				string? json = HttpContext.Session.GetString(paletteSessionKey);
 				if (string.IsNullOrEmpty(json)) //if Session does not contain the palette
 				{
 					var paletteResponse = await _plantsService.GetPaletteAsync<ResponseDto>(psToken);
@@ -111,7 +113,7 @@ namespace Plants.Pages
 						json = Convert.ToString(paletteResponse.Result);
 						if (!string.IsNullOrEmpty(json))
 						{
-							HttpContext.Session.SetString("palette", json); //save palette to session //!!!вынести строки в константы
+							HttpContext.Session.SetString(paletteSessionKey, json); //save palette to session
 						}
 					}
 				}
@@ -122,12 +124,12 @@ namespace Plants.Pages
 		/// <summary>
 		/// Removes the filter from the page session
 		/// </summary>
-		private void ResetFilter() => HttpContext.Session.Remove("filter");
+		private void ResetFilter() => HttpContext.Session.Remove(filterSessionKey);
 		/// <summary>
 		/// Saves the filter to the page session state
 		/// </summary>
 		private void SaveFilter() =>
-			HttpContext.Session.SetString("filter", JsonConvert.SerializeObject(Filter));
+			HttpContext.Session.SetString(filterSessionKey, JsonConvert.SerializeObject(Filter));
 	#endregion
 	}
 }

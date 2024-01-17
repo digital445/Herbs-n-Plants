@@ -15,7 +15,7 @@ namespace Plants.Services
 
         public async Task<T?> CreateUpdateAsync<T>(PlantDto plantDto, string token)
         {
-            return await SendAsync<T>(new ApiRequest {
+            return await SendAsync<T>(new ApiRequestDto {
                 ApiType = ApiType.POST,
                 Url = PlantsAPIBaseUrl + "/api/plants",
                 Data = plantDto,
@@ -24,7 +24,7 @@ namespace Plants.Services
         }
         public async Task<T?> DeleteAsync<T>(int id, string token)
         {
-            return await SendAsync<T>(new ApiRequest
+            return await SendAsync<T>(new ApiRequestDto
             {
                 ApiType = ApiType.DELETE,
                 Url = PlantsAPIBaseUrl + $"/api/plants/{id}",
@@ -34,7 +34,7 @@ namespace Plants.Services
 
         public async Task<T?> GetAsync<T>(int id, string token)
         {
-            return await SendAsync<T>(new ApiRequest
+            return await SendAsync<T>(new ApiRequestDto
             {
                 ApiType = ApiType.GET,
                 Url = PlantsAPIBaseUrl + $"/api/plants/{id}",
@@ -46,7 +46,7 @@ namespace Plants.Services
 		{
             string baseUrl = PlantsAPIBaseUrl + "/api/plants/filter";
 
-			return await SendAsync<T>(new ApiRequest
+			return await SendAsync<T>(new ApiRequestDto
 			{
 				ApiType = ApiType.GET,
 				Url = ConstructFilterUrl(baseUrl, filter, page, pageSize),
@@ -57,7 +57,7 @@ namespace Plants.Services
 
 		public async Task<T?> GetPageAsync<T>(int page, int pageSize, string token)
         {
-            return await SendAsync<T>(new ApiRequest
+            return await SendAsync<T>(new ApiRequestDto
             {
                 ApiType = ApiType.GET,
                 Url = PlantsAPIBaseUrl + $"/api/plants?page={page}&pageSize={pageSize}",
@@ -66,7 +66,7 @@ namespace Plants.Services
         }
         public async Task<T?> GetPaletteAsync<T>(string token)
         {
-            return await SendAsync<T>(new ApiRequest
+            return await SendAsync<T>(new ApiRequestDto
             {
                 ApiType = ApiType.GET,
                 Url = PlantsAPIBaseUrl + $"/api/plants/palette",
