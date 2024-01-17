@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using Plants.Services.IServices;
-using Plants.Models;
+using Plants.Models.Dto;
 using static Plants.StaticDetails;
 
 namespace Plants.Services
@@ -16,7 +16,7 @@ namespace Plants.Services
 		{
 			using var formDataContent = CreateFormData(file);
 
-			return await SendAsync<T?>(new ApiRequest
+			return await SendAsync<T?>(new ApiRequestDto
 			{
 				ApiType = ApiType.POST,
 				Url = "https://api.imgur.com/3/upload",
@@ -28,7 +28,7 @@ namespace Plants.Services
 
 		public async Task<T?> DeleteImageAsync<T>(string imageServiceId, string token)
 		{
-			return await SendAsync<T?>(new ApiRequest
+			return await SendAsync<T?>(new ApiRequestDto
 			{
 				ApiType = ApiType.DELETE,
 				Url = $"https://api.imgur.com/3/image/{imageServiceId}",
