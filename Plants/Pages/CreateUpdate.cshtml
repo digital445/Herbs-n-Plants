@@ -54,8 +54,7 @@
 										<input type="hidden" asp-for="Plant.ImageLinks[i].ImageId"/>
 										<input type="hidden" asp-for="Plant.ImageLinks[i].PlantId"/>
 										<input type="hidden" asp-for="Plant.ImageLinks[i].ImageServiceId"/>
-@*										<input type="hidden" name="Plant.ImageLinks[@i].ImageServiceId" value="@il.ImageServiceId"/>
-*@
+
 										<div class="card-body">
 											@*language selector*@
 											<label for="viewTypeDropdown@(i)" class="form-label">ViewType</label>
@@ -98,13 +97,10 @@
 									<input type="radio" id="defaultColor" name="Plant.FlowerColorCode" value="-1" @(isUpdating ? "" : "checked")>
 									<label class="bg-light" title="Not selected" for="defaultColor">X</label>
 
-									@if (Model.Palette != null)
+									@foreach (var clr in Model.Palette.OrderBy(clr => clr.ColorCode))
 									{
-										foreach (var clr in Model.Palette.OrderBy(clr => clr.ColorCode))
-										{
-											<input type="radio" id="@clr.ColorCode" name="Plant.FlowerColorCode" value=@clr.ColorCode @(clr.ColorCode == Model.Plant.FlowerColorCode ? "checked" : "")>
-											<label for="@clr.ColorCode" title="@clr.Name" style="background-color: @($"#{clr.ColorCode:X6}");"></label>
-										}
+										<input type="radio" id="@clr.ColorCode" name="Plant.FlowerColorCode" value=@clr.ColorCode @(clr.ColorCode == Model.Plant.FlowerColorCode ? "checked" : "")>
+										<label for="@clr.ColorCode" title="@clr.Name" style="background-color: @($"#{clr.ColorCode:X6}");"></label>
 									}
 								</div>
 							</div>

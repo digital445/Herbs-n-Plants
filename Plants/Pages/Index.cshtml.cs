@@ -13,10 +13,8 @@ namespace Plants.Pages
 	{
 		private readonly IPlantsService _plantsService;
 		private readonly ILogger<IndexModel> _logger;
-		private List<ColorDto>? _palette;
 
 		private const string psToken = "";
-		private const string paletteSessionKey = "palette"; //the key to store the palette in the page session
 		private const string filterSessionKey = "filter"; //the key to store the filter in the page session
 		private readonly int pageSize = 3;
 
@@ -45,8 +43,6 @@ namespace Plants.Pages
 			}
 			set { _filter = value; }
 		}
-		public List<ColorDto>? Palette { get => _palette; }
-
 
 		public IndexModel(ILogger<IndexModel> logger, IPlantsService plantsService)
 		{
@@ -56,7 +52,7 @@ namespace Plants.Pages
 
 		public async Task OnGet(bool reset = false)
 		{
-			await RefreshPalette();
+			await RefreshPalette(_plantsService, psToken);
 
 			if (reset)
 				ResetFilter();
@@ -80,7 +76,8 @@ namespace Plants.Pages
 		/// </summary>
 		public async Task OnPost()
 		{
-			await RefreshPalette();
+			await RefreshPalette(_plantsService, psToken);
+
 			SaveFilter();
 
 			var response = await _plantsService.GetFilteredAsync<ResponseDto>(Filter, PageId, pageSize, psToken);
@@ -96,31 +93,6 @@ namespace Plants.Pages
 		}
 
 	#region Private
-
-		/// <summary>
-		/// Sets the palette value by retrieving it from either the page session or the database.
-		/// </summary>
-		private async Task RefreshPalette()
-		{
-			if (_palette == null && HttpContext.Session.IsAvailable)
-			{
-				string? json = HttpContext.Session.GetString(paletteSessionKey);
-				if (string.IsNullOrEmpty(json)) //if Session does not contain the palette
-				{
-					var paletteResponse = await _plantsService.GetPaletteAsync<ResponseDto>(psToken);
-					if (paletteResponse != null && paletteResponse.IsSuccess)
-					{
-						json = Convert.ToString(paletteResponse.Result);
-						if (!string.IsNullOrEmpty(json))
-						{
-							HttpContext.Session.SetString(paletteSessionKey, json); //save palette to session
-						}
-					}
-				}
-
-				_palette = string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<IEnumerable<ColorDto>>(json)?.ToList();
-			}
-		}
 		/// <summary>
 		/// Removes the filter from the page session
 		/// </summary>

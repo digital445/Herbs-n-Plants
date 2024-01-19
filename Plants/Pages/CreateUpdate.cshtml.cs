@@ -13,15 +13,12 @@ namespace Plants.Pages
 	{
 		private readonly IImageStorageService _imageService;
 		private readonly IPlantsService _plantsService;
-		private List<ColorDto>? _palette;
 
 		private const string imgToken = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
 		private const string psToken = "";
-		private const string paletteSessionKey = "palette"; //the key to store palette in the page session
 
-		[BindProperty]
+        [BindProperty]
 		public PlantDto Plant { get; set; }
-		public List<ColorDto>? Palette { get => _palette; }
 
 		public CreateUpdateModel(IImageStorageService imageService, IPlantsService plantsService)
 		{
@@ -32,7 +29,7 @@ namespace Plants.Pages
 		}
 		public async Task<IActionResult> OnGet(int plantId = 0)
 		{
-			await RefreshPalette();
+			await RefreshPalette(_plantsService, psToken);
 
 			if (plantId > 0) //Plant update is coming
 			{
@@ -71,31 +68,6 @@ namespace Plants.Pages
 			}
 		}
 		#region Private
-		/// <summary>
-		///Sets the palette value by retrieving it from either the page session or the database.
-		/// </summary>
-		private async Task RefreshPalette()
-		{
-			if (_palette == null && HttpContext.Session.IsAvailable)
-			{
-				string? json = HttpContext.Session.GetString(paletteSessionKey);
-				if (string.IsNullOrEmpty(json)) //if Session does not contain the palette
-				{
-					var paletteResponse = await _plantsService.GetPaletteAsync<ResponseDto>(psToken);
-					if (paletteResponse != null && paletteResponse.IsSuccess)
-					{
-						json = Convert.ToString(paletteResponse.Result);
-						if (!string.IsNullOrEmpty(json))
-						{
-							HttpContext.Session.SetString(paletteSessionKey, json); //save palette to session
-						}
-					}
-				}
-
-				_palette = string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<IEnumerable<ColorDto>>(json)?.ToList();
-			}
-		}
-
 
 		private void ValidatePlant(int newImagesNumber)
 		{

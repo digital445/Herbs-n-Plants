@@ -46,13 +46,10 @@
 									<input type="radio" id="default" asp-for=Filter.FlowerColorCode value="-1">
 									<label class="bg-light" title="Not selected" for="default">X</label>
 
-									@if (Model.Palette != null)
+									@foreach (var clr in Model.Palette.OrderBy(clr => clr.ColorCode))
 									{
-										foreach (var clr in Model.Palette.OrderBy(clr => clr.ColorCode))
-										{
-											<input type="radio" id="@clr.ColorCode" asp-for=Filter.FlowerColorCode value=@clr.ColorCode>
-											<label for="@clr.ColorCode" title="@clr.Name" style="background-color: @($"#{clr.ColorCode:X6}");"></label>
-										}
+										<input type="radio" id="@clr.ColorCode" asp-for=Filter.FlowerColorCode value=@clr.ColorCode>
+										<label for="@clr.ColorCode" title="@clr.Name" style="background-color: @($"#{clr.ColorCode:X6}");"></label>
 									}
 								</div>
 							</div>

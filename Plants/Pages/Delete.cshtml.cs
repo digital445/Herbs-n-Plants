@@ -23,12 +23,22 @@ namespace Plants.Pages
 		public async Task<IActionResult> OnGet(int plantId = 0)
         {
 			var response = await _plantsService.DeleteAsync<ResponseDto>(plantId, psToken);
-			HandleDeleteResponse(response, plantId);
+			bool fullSuccess = false;
+			HandleDeleteResponse(response, plantId, ref fullSuccess);
+			if (fullSuccess)
+			{
+				//для удаления из Imgur нужен ImageID. Тут его нет.
+			}
 
 			return RedirectToPage("/ResultPage");
 		}
 
-		private void HandleDeleteResponse(ResponseDto? response, int plantId)
+		/// <summary>
+		/// Checks the response result, sets result messages and returns the final result via reference parameter
+		/// </summary>
+		/// <param name="response"></param>
+		/// <param name="plantId"></param>
+		private void HandleDeleteResponse(ResponseDto? response, int plantId, ref bool fullSuccess) //TODO: get rid of the plant
 		{
 			if (response == null)
 			{
@@ -40,6 +50,7 @@ namespace Plants.Pages
 				if (responseResult)
 				{
 					SetResultMessages(true, $"Plant {plantId} is successfully deleted.");
+					fullSuccess = true;
 				}
 				else
 				{
@@ -51,6 +62,5 @@ namespace Plants.Pages
 				SetResultMessages(false, "An exception occured while requesting plantService.", response.ErrorMessages);
 			}
 		}
-
 	}
 }
