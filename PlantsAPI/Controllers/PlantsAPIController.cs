@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Services.PlantsAPI.Models.Dto;
 using Services.PlantsAPI.Repository;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace Services.PlantsAPI.Controllers
 {
@@ -11,8 +9,8 @@ namespace Services.PlantsAPI.Controllers
 	[ApiController]
 	public class PlantsAPIController : ControllerBase
 	{
-		private ResponseDto _response;
-		private IPlantsRepository _plantsRepository;
+		private readonly ResponseDto _response;
+		private readonly IPlantsRepository _plantsRepository;
 
 		public PlantsAPIController(IPlantsRepository plantsRepository)
 		{

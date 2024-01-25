@@ -42,11 +42,11 @@ namespace Plants.Pages
 				bool responseResult = (bool)(response.Result ?? false);
 				if (responseResult)
 				{
-					SetResultMessages(true, $"Plant is successfully deleted.");
+					SetResultMessages(true, "Plant is successfully deleted.");
 				}
 				else
 				{
-					SetResultMessages(false, $"Error deleting Plant from db");
+					SetResultMessages(false, "Error deleting Plant from db");
 				}
 			}
 			else

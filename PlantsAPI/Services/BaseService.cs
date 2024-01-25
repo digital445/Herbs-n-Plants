@@ -10,7 +10,7 @@ namespace Services.PlantsAPI.Services
 	{
 		private readonly IHttpClientFactory _httpClientFactory;
 
-		public BaseService(IHttpClientFactory httpClientFactory) //is called while Dependency Injection is used
+		public BaseService(IHttpClientFactory httpClientFactory)
 		{
             _httpClientFactory = httpClientFactory;
 		}
@@ -62,8 +62,8 @@ namespace Services.PlantsAPI.Services
 				var response = new ResponseDto()
 				{
 					IsSuccess = false,
-					ErrorMessages = new List<string>() { ex.Message }
 				};
+				response.ErrorMessages.Add(ex.Message);
 				var res = JsonConvert.SerializeObject(response);
 				var apiResponseDto = JsonConvert.DeserializeObject<T>(res); //we use serialization/deserialization for returning an object of T type
 				return apiResponseDto;
