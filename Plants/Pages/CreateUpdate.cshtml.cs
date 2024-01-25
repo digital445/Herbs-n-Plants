@@ -63,7 +63,7 @@ namespace Plants.Pages
 				SetResultMessages(false,
 					"An exception occured while creating the Plant.",
 					ex.Message,
-					ex.InnerException?.Message);
+					ex.InnerException?.Message ?? "");
 				return RedirectToPage("/ResultPage");
 			}
 		}

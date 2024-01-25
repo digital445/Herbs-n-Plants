@@ -62,8 +62,8 @@ namespace Plants.Services
 				var response = new ResponseDto()
 				{
 					IsSuccess = false,
-					ErrorMessages = new List<string>() { ex.Message }
 				};
+				response.ErrorMessages.Add(ex.Message);
 				var res = JsonConvert.SerializeObject(response);
 				var apiResponseDto = JsonConvert.DeserializeObject<T>(res); //we use serialization/deserialization for returning an object of T type
 				return apiResponseDto;

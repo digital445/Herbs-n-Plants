@@ -32,7 +32,7 @@ namespace Services.PlantsAPI.Controllers
 			catch (Exception ex)
 			{
 				_response.IsSuccess = false;
-				_response.ErrorMessages = new List<string> { ex.Message };
+				_response.ErrorMessages.Add(ex.Message);
 			}
 			return _response;
 		}
@@ -49,7 +49,7 @@ namespace Services.PlantsAPI.Controllers
 			catch (Exception ex)
 			{
 				_response.IsSuccess = false;
-				_response.ErrorMessages = new List<string> { ex.Message };
+				_response.ErrorMessages.Add(ex.Message);
 			}
 			return _response;
 		}
@@ -66,7 +66,7 @@ namespace Services.PlantsAPI.Controllers
 			catch (Exception ex)
 			{
 				_response.IsSuccess = false;
-				_response.ErrorMessages = new List<string> { ex.Message };
+				_response.ErrorMessages.Add(ex.Message);
 			}
 			return _response;
 		}
@@ -83,7 +83,7 @@ namespace Services.PlantsAPI.Controllers
 			catch (Exception ex)
 			{
 				_response.IsSuccess = false;
-				_response.ErrorMessages = new List<string> { ex.Message };
+				_response.ErrorMessages.Add(ex.Message);
 			}
 			return _response;
 		}
@@ -101,7 +101,7 @@ namespace Services.PlantsAPI.Controllers
 			catch (Exception ex)
 			{
 				_response.IsSuccess = false;
-				_response.ErrorMessages = new List<string> { ex.Message };
+				_response.ErrorMessages.Add(ex.Message);
 				if (ex.InnerException != null)
 				{
 					_response.ErrorMessages.Add(ex.InnerException.Message);
@@ -123,7 +123,7 @@ namespace Services.PlantsAPI.Controllers
 			catch (Exception ex)
 			{
 				_response.IsSuccess = false;
-				_response.ErrorMessages = new List<string> { ex.Message };
+				_response.ErrorMessages.Add(ex.Message);
 			}
 			return _response;
 		}

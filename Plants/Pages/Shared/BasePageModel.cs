@@ -43,12 +43,12 @@ namespace Plants.Pages.Shared
 			}
 		}
 
-		protected void SetResultMessages(bool wasSuccess, params string?[] messages)
+		protected void SetResultMessages(bool wasSuccess, params string[] messages)
 		{
 			TempData["ResultMessages"] = string.Join(Environment.NewLine, messages);
 			TempData["Success"] = wasSuccess;
 		}
-		protected void SetResultMessages(bool wasSuccess, string firstMessage, IEnumerable<string>? messages)
+		protected void SetResultMessages(bool wasSuccess, string firstMessage, IEnumerable<string> messages)
 		{
 			string messagesString = (messages == null) ? string.Empty : string.Join(Environment.NewLine, messages);
 			
