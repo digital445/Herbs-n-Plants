@@ -29,7 +29,7 @@ namespace Services.PlantsAPI.Services
 				}
 				catch (Exception ex)
 				{
-					//!!! log exception
+					//TODO: log exception
 				}
 			}
 		}

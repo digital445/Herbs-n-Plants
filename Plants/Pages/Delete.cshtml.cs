@@ -7,7 +7,7 @@ using Plants.Services.IServices;
 namespace Plants.Pages
 {
 	/// <summary>
-	/// The PageModel for the Delete Page handles plant deletions.
+	/// The PageModel for the Delete Page. Handles plant deletions.
 	/// </summary>
     public class DeleteModel : BasePageModel
     {
@@ -23,22 +23,15 @@ namespace Plants.Pages
 		public async Task<IActionResult> OnGet(int plantId = 0)
         {
 			var response = await _plantsService.DeleteAsync<ResponseDto>(plantId, psToken);
-			bool fullSuccess = false;
-			HandleDeleteResponse(response, plantId, ref fullSuccess);
-			if (fullSuccess)
-			{
-				//для удаления из Imgur нужен ImageID. Тут его нет.
-			}
+			HandleDeleteResponse(response);
 
 			return RedirectToPage("/ResultPage");
 		}
 
 		/// <summary>
-		/// Checks the response result, sets result messages and returns the final result via reference parameter
+		/// Checks the response result, sets result messages
 		/// </summary>
-		/// <param name="response"></param>
-		/// <param name="plantId"></param>
-		private void HandleDeleteResponse(ResponseDto? response, int plantId, ref bool fullSuccess) //TODO: get rid of the plant
+		private void HandleDeleteResponse(ResponseDto? response)
 		{
 			if (response == null)
 			{
@@ -49,12 +42,11 @@ namespace Plants.Pages
 				bool responseResult = (bool)(response.Result ?? false);
 				if (responseResult)
 				{
-					SetResultMessages(true, $"Plant {plantId} is successfully deleted.");
-					fullSuccess = true;
+					SetResultMessages(true, $"Plant is successfully deleted.");
 				}
 				else
 				{
-					SetResultMessages(false, $"Error deleting Plant {plantId} from db");
+					SetResultMessages(false, $"Error deleting Plant from db");
 				}
 			}
 			else

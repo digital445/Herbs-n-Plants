@@ -76,7 +76,7 @@ namespace Services.PlantsAPI.Repository
 			}
 			catch (Exception)
 			{
-				//!!! log exception
+				//TODO: log exception
 				return false;
 			}
 		}

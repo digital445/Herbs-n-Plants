@@ -19,7 +19,7 @@ namespace Plants.Pages.Shared
         /// </summary>
         /// <param name="plantsService">Service to get the palette from if needed</param>
         /// <param name="psToken">Service token</param>
-        public async Task RefreshPalette(IPlantsService plantsService, string psToken)
+        protected async Task RefreshPalette(IPlantsService plantsService, string psToken)
 		{
 			if (!_palette.Any() && HttpContext.Session.IsAvailable)
 			{
