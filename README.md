@@ -14,3 +14,6 @@ Technologies used:
 HTML, CSS, Bootstrap, JavaScript  
 - Backend:  
 ASP.NET Core Razor Pages, PostgreSQL, RESTful API, External Imgur API, Identity Server
+
+Disclaimer:  
+*This project is for personal learning, and its main goal is to gain experience in using specific technologies. Therefore, I kindly ask not to evaluate it in terms of potential mismatch between the employed tools and the application's declared goals.*
