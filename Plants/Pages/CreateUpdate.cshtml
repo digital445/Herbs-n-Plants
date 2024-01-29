@@ -1,0 +1,388 @@
+﻿@page "{plantId:int?}" //optional route parameter
+@using Plants.Models.Dto;
+@using System.Reflection;
+@model Plants.Pages.CreateUpdateModel
+@{
+	var enumViewTypes = (ViewType[])Enum.GetValues(typeof(ViewType));
+	bool isUpdating = Model.Plant.PlantId > 0;
+}
+<div class="container mt-5">
+	<div class="card">
+		<div class="card-header">
+			@(isUpdating ? "Update the Plant" : "Create a Plant")
+		</div>
+		<div class="card-body">
+			<form method="post" enctype="multipart/form-data" id="imageForm">
+				<div class="row" id="imagesRow">
+					@*A template for adding new Image*@
+					<div class="col-4" id="imageTemplate" style="display: none;">
+						<div class="p-0 my-3 border">
+							<div class="card">
+								<img src="" class="card-img-top fixed-card-img-top">
+								<div class="card-body">
+									@*language selector*@
+									<label for="viewTypeDropdown" class="form-label">ViewType</label>
+									<select name="viewType" class="form-select" id="viewTypeDropdown">
+										@foreach (var vt in enumViewTypes)
+										{
+											<option selected="@(vt == ViewType.GeneralView)" value="@vt">@vt.ToString()</option>
+										}
+									</select>
+									@*delete button*@
+									<div class="d-flex justify-content-end">
+										<button type="button" class="btn btn-danger mt-2 delete-btn">Delete</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					@if (isUpdating)
+					{
+						<input type="hidden" asp-for="Plant.PlantId"/>
+						//display images of updating Plant
+						for (int i = 0; i < Model.Plant.ImageLinks.Count; i++)
+						{
+							ImageLinkDto il = Model.Plant.ImageLinks[i];
+							<div class="col-4" id="image@(i)">
+								<div class="p-0 my-3 border">
+									<div class="card">
+										<img src="@il.ImageUrl" class="card-img-top fixed-card-img-top">
+
+										@*Preserve non-changeable properties*@
+										<input type="hidden" asp-for="Plant.ImageLinks[i].ImageUrl" />
+										<input type="hidden" asp-for="Plant.ImageLinks[i].ImageId"/>
+										<input type="hidden" asp-for="Plant.ImageLinks[i].PlantId"/>
+										<input type="hidden" asp-for="Plant.ImageLinks[i].ImageServiceId"/>
+
+										<div class="card-body">
+											@*language selector*@
+											<label for="viewTypeDropdown@(i)" class="form-label">ViewType</label>
+											<select name="Plant.ImageLinks[@i].ViewType" class="form-select" id="viewTypeDropdown@(i)">
+												@foreach (var vt in enumViewTypes)
+												{
+													<option selected="@(vt == il.ViewType)" value="@vt">@vt.ToString()</option>
+												}
+											</select>
+
+											<div class="d-flex justify-content-end">
+												<button type="button" class="btn btn-danger mt-2 delete-btn" onclick="deleteImageLink(@i)">Delete</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						}
+					}
+				</div>
+
+				<div class="row" id="addImageRow">
+					<div class="col-4">
+						<div class="p-0 my-3 border card">
+							<input type="file" id="imageInput" style="display: none;" name="files" accept="image/*" multiple>  @*The input is hidden to make the alternative button style*@
+							<button type="button" class="btn btn-primary" onclick="addImages()" id="addImagesButton">Add Images</button>
+						</div>
+					</div>
+				</div>
+
+
+				<div id="Palette" class="border mt-2 p-2">
+					<div class="row">
+						<div class="col-auto d-flex">
+							<h5>Flower Color</h5>
+						</div>
+						<div class="col-4">
+							<div class="card p-2 bg-light">
+								<div class="color-palette">
+									<input type="radio" id="defaultColor" name="Plant.FlowerColorCode" value="-1" @(isUpdating ? "" : "checked")>
+									<label class="bg-light" title="Not selected" for="defaultColor">X</label>
+
+									@foreach (var clr in Model.Palette.OrderBy(clr => clr.ColorCode))
+									{
+										<input type="radio" id="@clr.ColorCode" name="Plant.FlowerColorCode" value=@clr.ColorCode @(clr.ColorCode == Model.Plant.FlowerColorCode ? "checked" : "")>
+										<label for="@clr.ColorCode" title="@clr.Name" style="background-color: @($"#{clr.ColorCode:X6}");"></label>
+									}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="Names" class="border mt-2 p-2">
+					<h5>Names</h5>
+					@{
+						var enumLanguages = (Language[])Enum.GetValues(typeof(Language));
+						var stringLanguages = enumLanguages.Select(lng => lng.ToString());
+					}
+					<div class="ms-4">
+						<div id="plantNamesContainer">
+							@*A template for adding new PlantName*@
+							<div class="plant-name row" id="plantNameTemplate" style="display: none;">
+								<div class="col-2">
+									<label for="languageDropdown" class="form-label">Language</label>
+									<select name="" class="form-select" id="languageDropdown">
+										@foreach (var lng in enumLanguages)
+										{
+											<option selected="@(lng == Language.Unknown)" value="@lng">@lng.ToString()</option>
+										}
+									</select>
+								</div>
+								<div class="col">
+									<label for="nameInput" class="form-label">Name</label>
+									<input type="text" name="" value="" class="form-control" id="nameInput" />
+								</div>
+							</div>
+
+							@{
+								List<PlantNameDto> names = Model.Plant.Names;
+								for (int i = 0; i < names.Count; i++)
+								{
+									<div class="plant-name row" id="plantName@(i)">
+										<div class="col-2">
+											<label for="languageDropdown@(i)" class="form-label">Language</label>
+											<select name="Plant.Names[@i].Language" class="form-select" id="languageDropdown@(i)">
+												@foreach (var lng in enumLanguages)
+												{
+													<option selected="@(lng == names[i].Language)" value="@lng">@lng.ToString()</option>
+												}
+											</select>
+										</div>
+										<div class="col">
+											<label for="nameInput@(i)" class="form-label">Name</label>
+											<input type="text" name="Plant.Names[@i].Name" value="@names[i].Name" class="form-control" id="nameInput@(i)" />
+											<input type="hidden" asp-for="Plant.Names[i].PlantNameId"/>
+											<input type="hidden" asp-for="Plant.Names[i].PlantId"/>
+										</div>
+									</div>
+								}
+							}
+						</div>
+						<div class="row mt-1" id="plantNamesButtons">
+							<div class="col-auto">
+								<button type="button" class="btn btn-primary" onclick="addPlantName()">Add</button>
+							</div>
+							<div class="col-auto">
+								<button type="button" class="btn btn-danger" onclick="deleteLastPlantName()" id="deletePlantNameBtn" disabled="@(names.Count < 2)">Delete</button>
+							</div>
+						</div>
+					</div>
+
+				</div>
+				<div id="BooleanProperties" class="border mt-2 p-2">
+					<h5>Properties</h5>
+					@{
+						bool?[] nullBoolValues = { true, false, null };
+						var nullBoolProperties = typeof(PlantDto).GetProperties().Where(pi => pi.PropertyType == typeof(bool?));
+						foreach (PropertyInfo pi in nullBoolProperties)
+						{
+							bool? plantPropertyValue = (bool?)pi.GetValue(Model.Plant);
+							<div class="row" id="@pi.Name">
+								<div class="col-2">
+									@pi.Name
+								</div>
+								<div class="col-10">
+									@foreach (bool? nullBool in nullBoolValues)
+									{
+										<label>
+											<input type="radio" name=@($"Plant.{pi.Name}") value=@(nullBool?.ToString() ?? "null") checked="@(nullBool == plantPropertyValue)">
+											@NullBoolPlantToString(nullBool)
+										</label>
+									}
+								</div>
+							</div>
+						}
+					}
+
+				</div>
+
+				<button type="submit" class="btn btn-primary mt-1" id="submitButton">@(isUpdating ? "Update" : "Upload")</button>
+				<button type="button" class="btn btn-link mt-1" onclick="resetForm()">Reset</button>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+	//declare global variables
+	const imageForm = document.getElementById('imageForm');
+	let selectedImages = {}; //The inner data supposed to be [file, viewType]
+	let imgLinksNumber = @(Model.Plant.ImageLinks.Count);
+	let newImgIndex = imgLinksNumber;
+	let newPlantNameCounter = @(Model.Plant.Names.Count - 1);
+
+	//adding new Images
+	document.getElementById('imageInput').addEventListener('change', function (event) {
+		let input = event.target;
+
+		if (input.files && input.files.length > 0) {
+			for (let file of input.files) {
+
+				let reader = new FileReader();
+
+				reader.onload = function () {
+					let imagesRow = document.getElementById('imagesRow');
+
+					let newImage = document.getElementById('imageTemplate').cloneNode('true');
+					newImage.id = `image${newImgIndex}`;
+					newImage.style.display = "";
+					let image = newImage.querySelector('.card-img-top');
+					image.src = reader.result;
+
+					let label = newImage.querySelector('label');
+					let oldFor = label.getAttribute("for");
+					label.setAttribute("for", oldFor + newImgIndex);
+
+					let selectView = newImage.querySelector('.form-select');
+					selectView.id += newImgIndex;
+					selectView.addEventListener('change', function () {
+						selectedImages[newImage.id][1] = selectView.value;
+					});
+
+					// Add a delete button to each image
+					let deleteButton = newImage.querySelector('.delete-btn');
+					deleteButton.addEventListener('click', function () {
+						delete selectedImages[newImage.id];
+						newImage.remove();
+					});
+
+					// Add the selected image file to the selectedImages array
+					selectedImages[newImage.id] = [file, selectView.value];
+
+					//Insert the new Image before the AddImage card
+					imagesRow.appendChild(newImage);
+					newImgIndex++;
+				};
+				reader.readAsDataURL(file);
+			}
+		}
+	});
+
+	function addImages() {
+		document.getElementById('imageInput').click();
+	}
+
+	function addPlantName() {
+		newPlantNameCounter++;
+		let container = document.getElementById("plantNamesContainer");
+		let newPlantName = document.getElementById("plantNameTemplate").cloneNode(true);
+		newPlantName.id = "plantName" + newPlantNameCounter;
+		newPlantName.style.display = "";
+
+		let labels = newPlantName.querySelectorAll('label');
+		for (let label of labels) {
+			let oldFor = label.getAttribute("for");
+			label.setAttribute("for", oldFor + newPlantNameCounter);
+		}
+
+		let languageSelect = newPlantName.querySelector('select');
+		languageSelect.name = `Plant.Names[${newPlantNameCounter}].Language`;
+		languageSelect.id += newPlantNameCounter;
+
+		let nameInput = newPlantName.querySelector('input');
+		nameInput.name = `Plant.Names[${newPlantNameCounter}].Name`;
+		nameInput.id += newPlantNameCounter;
+
+		container.appendChild(newPlantName);
+
+		let deleteBtn = document.getElementById("deletePlantNameBtn");
+		deleteBtn.removeAttribute("disabled");
+
+	}
+
+	function deleteLastPlantName() {
+		let pnToDelete = document.getElementById("plantName" + newPlantNameCounter);
+
+		if (pnToDelete) {
+			pnToDelete.parentNode.removeChild(pnToDelete); // Remove the element from its parent node
+			if (--newPlantNameCounter == 0) {
+				let deleteBtn = document.getElementById("deletePlantNameBtn");
+				deleteBtn.setAttribute("disabled", "");
+			}
+		}
+	}
+
+	//delete an existing image link
+	function deleteImageLink(index) {
+		if (confirm('Are you sure you want to delete this image?')) {
+			let imageDiv = document.getElementById('image' + index);
+			if (imageDiv) {
+				imageDiv.remove();
+				for (let i = index + 1; i < imgLinksNumber; i++) {
+					imageDiv = document.getElementById('image' + i);
+					if (imageDiv) {
+						let newDiv = document.createElement('div');
+						newDiv.className = imageDiv.className;
+						newDiv.id = imageDiv.id;
+						newDiv.innerHTML = imageDiv.innerHTML.replace(/Plant\.ImageLinks\[(\d+)\]/g, function (match, group) {
+							var index = parseInt(group) - 1;
+							return `Plant.ImageLinks[${index}]`;
+						});
+
+						imageDiv.parentNode.replaceChild(newDiv, imageDiv);
+					}
+				}
+			}
+		}
+	}
+
+	function resetForm() {
+		for (let i = 0; i < newPlantNameCounter; i++) {
+			deleteLastPlantName();
+		}
+		for (let key in selectedImages) {
+			document.getElementById(key).remove();
+			delete selectedImages[key];
+		}
+		newImgIndex = 0;
+		imageForm.reset();
+	}
+
+	imageForm.addEventListener('submit', function (event) {
+		event.preventDefault();
+
+		let initialFormData = new FormData(imageForm);
+		let updatedFormData = new FormData();
+
+		let keysArray = Object.keys(selectedImages); //Get an array of keys to preserve the order for futher iterations
+
+		//add files to be uploaded and their viewTypes to the form
+		for (let key of keysArray) {
+			let pair = selectedImages[key];
+			updatedFormData.append('files', pair[0]);
+			updatedFormData.append('viewTypes', pair[1]);
+		}
+
+		for (let pair of initialFormData.entries()) {
+			let key = pair[0];
+			if (key !== 'files' && key !== 'viewType') {
+				updatedFormData.append(pair[0], pair[1]);
+			}
+		}
+
+		let redirectUrl = "";
+		// Submit the form with the selected images and handle the response
+		fetch(window.location.href, {
+			method: 'POST',
+			body: updatedFormData,
+			redirect: 'follow',
+		})
+			.then(response => {
+				if (response.ok) {
+					if (response.redirected) {
+						redirectUrl = response.url;
+						console.log('Final URL after redirection:', redirectUrl);
+						return response.text();
+					}
+					console.log('Form submitted successfully.');
+				} else {
+					console.error('Unsuccessful response:', response.statusText);
+				}
+			})
+			.then(htmlContent => {
+				document.documentElement.innerHTML = htmlContent;
+				history.pushState({}, '', redirectUrl);
+			})
+			.catch(error => {
+				console.error('Fetch error:', error);
+			});
+	});
+</script>

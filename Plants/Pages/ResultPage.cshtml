@@ -1,0 +1,19 @@
+﻿@page
+@using Microsoft.Extensions.Primitives;
+@model Plants.Pages.ResultPageModel
+@{
+	ViewData["Title"] = "Result";
+	var messages = Model.ResultMessages;
+}
+<h1>@(Model.Success ? "Success" : "Error")</h1>
+@if(!StringValues.IsNullOrEmpty(messages))
+{
+	foreach (var line in messages)
+	{
+		<p>@line</p>
+	}
+}
+<div>
+	<a class="btn btn-primary" href="@Model.Referer" @(Model.Success ? "hidden" : "")>Previous Page</a>
+	<a class="btn btn-secondary" href="/">Back Home</a>
+</div>
