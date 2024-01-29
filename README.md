@@ -9,4 +9,4 @@ Technologies used:
   Frontend:
     HTML, CSS, Bootstrap, JavaScript
   Backend:
-    ASP.NET Core Razor Pages, 
+    ASP.NET Core Razor Pages, PostgreSQL, RESTful API, External Imgur API, Identity Server
