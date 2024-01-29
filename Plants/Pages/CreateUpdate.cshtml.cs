@@ -4,36 +4,29 @@ using Plants.Services.IServices;
 using Plants.Models.Dto;
 using Plants.Models.Dto.Imgur;
 using static Plants.StaticDetails;
-using Plants.Pages.Shared;
 using System.Collections.Concurrent;
 
 namespace Plants.Pages
 {
-	public class CreateUpdateModel : BasePageModel
+    public class CreateUpdateModel : BasePageModel
 	{
-		private readonly IImageStorageService _imageService;
-		private readonly IPlantsService _plantsService;
-
-		private const string imgToken = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
-		private const string psToken = "";
-
         [BindProperty]
 		public PlantDto Plant { get; set; }
 
-		public CreateUpdateModel(IImageStorageService imageService, IPlantsService plantsService)
+		public CreateUpdateModel(
+			IImageStorageService imageService, 
+			IPlantsService plantsService) : base(imageService, plantsService)
 		{
-			_imageService = imageService;
-			_plantsService = plantsService;
 			Plant = new PlantDto();
 			Plant.Names.Add(new PlantNameDto());
 		}
 		public async Task<IActionResult> OnGet(int plantId = 0)
 		{
-			await RefreshPalette(_plantsService, psToken);
+			await RefreshPalette();
 
 			if (plantId > 0) //Plant update is coming
 			{
-				var plantResponse = await _plantsService.GetAsync<ResponseDto>(plantId, psToken);
+				var plantResponse = await _plantsService.GetAsync<ResponseDto>(plantId);
 				if (plantResponse?.IsSuccess == true)
 					Plant = JsonConvert.DeserializeObject<PlantDto>(Convert.ToString(plantResponse.Result)!) ?? Plant;
 				else
@@ -53,7 +46,7 @@ namespace Plants.Pages
 				await UploadImageFiles(files, viewTypes);
 				HandleUpload();
 
-				var psResponse = await _plantsService.CreateUpdateAsync<ResponseDto>(Plant, psToken);
+				var psResponse = await _plantsService.CreateUpdateAsync<ResponseDto>(Plant);
 				HandleResponse(psResponse);
 
 				return RedirectToPage("/ResultPage");
@@ -98,7 +91,7 @@ namespace Plants.Pages
 				var (file, viewType) = item;
 				if (file == null)
 					return;
-				var imageResponse = await _imageService.UploadImageAsync<ImgurResponseDto>(file, imgToken);
+				var imageResponse = await _imageService.UploadImageAsync<ImgurResponseDto>(file);
 				if (imageResponse != null && imageResponse.success && imageResponse.data != null)
 				{
 					ImageDataDto? imageData = JsonConvert.DeserializeObject<ImageDataDto>(Convert.ToString(imageResponse.data)!);

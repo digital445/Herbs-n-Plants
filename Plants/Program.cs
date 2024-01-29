@@ -4,6 +4,8 @@ using Plants.Services.IServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
+string IdentityServerBaseUrl = builder.Configuration["Services:IdentityServer:BaseUrl"] ?? "";
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 
@@ -22,9 +24,8 @@ builder.Services.AddAuthentication(options =>
 })
 	.AddCookie("Cookies", c => c.ExpireTimeSpan = TimeSpan.FromMinutes(10))
 	.AddOpenIdConnect("oidc", options =>
-	//options should correspond those in Identity.StaticDetails class
 	{
-		options.Authority = builder.Configuration["ServiceUrls:IdentityServer"];
+		options.Authority = IdentityServerBaseUrl;
 		options.GetClaimsFromUserInfoEndpoint = true;
 		options.ClientId = "Plants.Web"; //got from Identity\StaticDetails
 		options.ClientSecret = "secret"; //is simple for testing
@@ -38,7 +39,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddHttpClient<IPlantsService, PlantsService>();
 builder.Services.AddHttpClient<IImageStorageService, ImgurImageStorageService>();
-StaticDetails.PlantsAPIBaseUrl = builder.Configuration["ServiceUrls:PlantsAPI"];
 builder.Services.AddScoped<IPlantsService, PlantsService>();
 builder.Services.AddScoped<IImageStorageService, ImgurImageStorageService>();
 

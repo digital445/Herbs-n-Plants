@@ -1,28 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Plants.Models.Dto;
-using Plants.Pages.Shared;
 using Plants.Services.IServices;
 
 namespace Plants.Pages
 {
-	/// <summary>
-	/// The PageModel for the Delete Page. Handles plant deletions.
-	/// </summary>
+    /// <summary>
+    /// The PageModel for the Delete Page. Handles plant deletions.
+    /// </summary>
     public class DeleteModel : BasePageModel
     {
-        private readonly IPlantsService _plantsService;
-
-		private const string psToken = "";
-
-		public DeleteModel(IPlantsService plantsService)
+		public DeleteModel(
+			IImageStorageService imageService, 
+			IPlantsService plantsService) : base(imageService, plantsService)
 		{
-			_plantsService = plantsService;
 		}
 
 		public async Task<IActionResult> OnGet(int plantId = 0)
         {
-			var response = await _plantsService.DeleteAsync<ResponseDto>(plantId, psToken);
+			var response = await _plantsService.DeleteAsync<ResponseDto>(plantId);
 			HandleDeleteResponse(response);
 
 			return RedirectToPage("/ResultPage");

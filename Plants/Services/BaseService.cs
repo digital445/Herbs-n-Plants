@@ -10,7 +10,7 @@ namespace Plants.Services
 	{
 		private readonly IHttpClientFactory _httpClientFactory;
 
-		public BaseService(IHttpClientFactory httpClientFactory) //is called while Dependency Injection is used
+		public BaseService(IHttpClientFactory httpClientFactory)
 		{
             _httpClientFactory = httpClientFactory;
 		}
@@ -51,6 +51,7 @@ namespace Plants.Services
 				string apiContent = await apiResponse.Content.ReadAsStringAsync();
 				if (string.IsNullOrEmpty(apiContent))
 				{
+					//TODO: change to UnexpectableServiceResponse
 					throw new Exception("HTTP-response: " + (int)apiResponse.StatusCode + " -- " + apiResponse.ReasonPhrase);
 				}
 

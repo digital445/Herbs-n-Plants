@@ -7,39 +7,47 @@ namespace Plants.Services
 {
 	public class ImgurImageStorageService : BaseService, IImageStorageService
 	{
-		private const string albumHash = "piwTiWk";
-		public ImgurImageStorageService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+		private readonly string ImgurAPIBaseUrl;
+		private readonly string ImgurAPIAccessToken;
+		private readonly string ImgurAPIAlbumHash;
+
+		public ImgurImageStorageService(
+			IConfiguration configuration,
+			IHttpClientFactory httpClientFactory) : base(httpClientFactory)
 		{
+			ImgurAPIBaseUrl = configuration.GetValue<string>("Services:ImgurAPI:BaseUrl") ?? "";
+			ImgurAPIAccessToken = configuration.GetValue<string>("Services:ImgurAPI:AccessToken") ?? "";
+			ImgurAPIAlbumHash = configuration.GetValue<string>("Services:ImgurAPI:AlbumHash") ?? "";
 		}
 
-		public async Task<T?> UploadImageAsync<T>(IFormFile file, string token)
+		public async Task<T?> UploadImageAsync<T>(IFormFile file)
 		{
 			using var formDataContent = CreateFormData(file);
 
 			return await SendAsync<T?>(new ApiRequestDto
 			{
 				ApiType = ApiType.POST,
-				Url = "https://api.imgur.com/3/upload",
+				Url = ImgurAPIBaseUrl + "/upload",
 				Data = formDataContent,
-				AccessToken = token
+				AccessToken = ImgurAPIAccessToken
 			});
 		}
 
 
-		public async Task<T?> DeleteImageAsync<T>(string imageServiceId, string token)
+		public async Task<T?> DeleteImageAsync<T>(string imageId)
 		{
 			return await SendAsync<T?>(new ApiRequestDto
 			{
 				ApiType = ApiType.DELETE,
-				Url = $"https://api.imgur.com/3/image/{imageServiceId}",
-				AccessToken = token
+				Url = ImgurAPIBaseUrl + $"/image/{imageId}",
+				AccessToken = ImgurAPIAccessToken
 			});
 		}
 		private MultipartFormDataContent CreateFormData(IFormFile file)
 		{
 			var formDataContent = new MultipartFormDataContent
 			{
-				{ new StringContent(albumHash), "album" },
+				{ new StringContent(ImgurAPIAlbumHash), "album" },
 			};
 
 			byte[] byteArray;
@@ -54,7 +62,5 @@ namespace Plants.Services
 			formDataContent.Add(imageContent, "image", "image.jpg");
 			return formDataContent;
 		}
-
-
 	}
 }

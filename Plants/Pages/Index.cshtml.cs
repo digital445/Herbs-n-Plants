@@ -1,20 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Plants.Models.Dto;
-using Plants.Pages.Shared;
 using Plants.Services.IServices;
 
 namespace Plants.Pages
 {
-	/// <summary>
-	/// The PageModel for the Index Page, which displays requested plants
-	/// </summary>
-	public class IndexModel : BasePageModel
+    /// <summary>
+    /// The PageModel for the Index Page, which displays requested plants
+    /// </summary>
+    public class IndexModel : BasePageModel
 	{
-		private readonly IPlantsService _plantsService;
 		private readonly ILogger<IndexModel> _logger;
 
-		private const string psToken = "";
 		private const string filterSessionKey = "filter"; //the key to store the filter in the page session
 		private readonly int pageSize = 3;
 
@@ -44,22 +41,24 @@ namespace Plants.Pages
 			set { _filter = value; }
 		}
 
-		public IndexModel(ILogger<IndexModel> logger, IPlantsService plantsService)
+		public IndexModel(
+			ILogger<IndexModel> logger,
+			IImageStorageService imageService,
+			IPlantsService plantsService) : base(imageService, plantsService)
 		{
 			_logger = logger;
-			_plantsService = plantsService;
 		}
 
 		public async Task OnGet(bool reset = false)
 		{
-			await RefreshPalette(_plantsService, psToken);
+			await RefreshPalette();
 
 			if (reset)
 				ResetFilter();
 
 			ResponseDto? response = Filter.IsApplied
-				? await _plantsService.GetFilteredAsync<ResponseDto>(Filter, PageId, pageSize, psToken)
-				: await _plantsService.GetPageAsync<ResponseDto>(PageId, pageSize, psToken);
+				? await _plantsService.GetFilteredAsync<ResponseDto>(Filter, PageId, pageSize)
+				: await _plantsService.GetPageAsync<ResponseDto>(PageId, pageSize);
 
 			if (response?.IsSuccess == true)
 			{
@@ -76,11 +75,11 @@ namespace Plants.Pages
 		/// </summary>
 		public async Task OnPost()
 		{
-			await RefreshPalette(_plantsService, psToken);
+			await RefreshPalette();
 
 			SaveFilter();
 
-			var response = await _plantsService.GetFilteredAsync<ResponseDto>(Filter, PageId, pageSize, psToken);
+			var response = await _plantsService.GetFilteredAsync<ResponseDto>(Filter, PageId, pageSize);
 			if (response?.IsSuccess == true)
 			{
 				var result = JsonConvert.DeserializeObject<PageResultDto>(Convert.ToString(response.Result)!);

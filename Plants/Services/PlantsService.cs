@@ -9,40 +9,47 @@ namespace Plants.Services
 {
     public class PlantsService : BaseService, IPlantsService
     {
-        public PlantsService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
-        {
-        }
+        private readonly string PlantsAPIBaseUrl;
+		private readonly string PlantsAPIAccessToken;
 
-        public async Task<T?> CreateUpdateAsync<T>(PlantDto plantDto, string token)
+		public PlantsService(
+            IConfiguration configuration, 
+            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+        {
+            PlantsAPIBaseUrl = configuration.GetValue<string>("Services:PlantsAPI:BaseUrl") ?? "";
+			PlantsAPIAccessToken = configuration.GetValue<string>("Services:PlantsAPI:AccessToken") ?? "";
+		}
+
+		public async Task<T?> CreateUpdateAsync<T>(PlantDto plantDto)
         {
             return await SendAsync<T>(new ApiRequestDto {
                 ApiType = ApiType.POST,
                 Url = PlantsAPIBaseUrl + "/api/plants",
                 Data = plantDto,
-                AccessToken = token
-            });
+                AccessToken = PlantsAPIAccessToken
+			});
         }
-        public async Task<T?> DeleteAsync<T>(int id, string token)
+        public async Task<T?> DeleteAsync<T>(int id)
         {
             return await SendAsync<T>(new ApiRequestDto
             {
                 ApiType = ApiType.DELETE,
                 Url = PlantsAPIBaseUrl + $"/api/plants/{id}",
-                AccessToken = token
-            });
+                AccessToken = PlantsAPIAccessToken
+			});
         }
 
-        public async Task<T?> GetAsync<T>(int id, string token)
+        public async Task<T?> GetAsync<T>(int id)
         {
             return await SendAsync<T>(new ApiRequestDto
             {
                 ApiType = ApiType.GET,
                 Url = PlantsAPIBaseUrl + $"/api/plants/{id}",
-                AccessToken = token
-            });
+                AccessToken = PlantsAPIAccessToken
+			});
         }
 
-        public async Task<T?> GetFilteredAsync<T>(FilterDto filter, int page, int pageSize, string token)
+        public async Task<T?> GetFilteredAsync<T>(FilterDto filter, int page, int pageSize)
 		{
             string baseUrl = PlantsAPIBaseUrl + "/api/plants/filter";
 
@@ -50,32 +57,32 @@ namespace Plants.Services
 			{
 				ApiType = ApiType.GET,
 				Url = ConstructFilterUrl(baseUrl, filter, page, pageSize),
-				AccessToken = token
+				AccessToken = PlantsAPIAccessToken
 			});
 		}
 
 
-		public async Task<T?> GetPageAsync<T>(int page, int pageSize, string token)
+		public async Task<T?> GetPageAsync<T>(int page, int pageSize)
         {
             return await SendAsync<T>(new ApiRequestDto
             {
                 ApiType = ApiType.GET,
                 Url = PlantsAPIBaseUrl + $"/api/plants?page={page}&pageSize={pageSize}",
-                AccessToken = token
-            });
+                AccessToken = PlantsAPIAccessToken
+			});
         }
-        public async Task<T?> GetPaletteAsync<T>(string token)
+        public async Task<T?> GetPaletteAsync<T>()
         {
             return await SendAsync<T>(new ApiRequestDto
             {
                 ApiType = ApiType.GET,
-                Url = PlantsAPIBaseUrl + $"/api/plants/palette",
-                AccessToken = token
-            });
+                Url = PlantsAPIBaseUrl + "/api/plants/palette",
+                AccessToken = PlantsAPIAccessToken
+			});
         }
 
 		/// <summary>
-		/// Constructs URL from FilterDto properties
+		/// Constructs the URL from FilterDto properties
 		/// </summary>
 		private string ConstructFilterUrl(string baseUrl, FilterDto filter, int page, int pageSize)
 		{

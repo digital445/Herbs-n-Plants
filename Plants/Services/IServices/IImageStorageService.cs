@@ -2,7 +2,7 @@
 {
 	public interface IImageStorageService
 	{
-		Task<T?> UploadImageAsync<T>(IFormFile file, string token);
-		Task<T?> DeleteImageAsync<T>(string imageServiceId, string token);
+		Task<T?> UploadImageAsync<T>(IFormFile file);
+		Task<T?> DeleteImageAsync<T>(string imageId);
 	}
 }
