@@ -12,6 +12,7 @@ namespace Plants.Pages
 	{
         [BindProperty]
 		public PlantDto Plant { get; set; }
+		public string Referer = "/"; //url the request was got from
 
 		public CreateUpdateModel(
 			IImageStorageService imageService, 
@@ -22,6 +23,8 @@ namespace Plants.Pages
 		}
 		public async Task<IActionResult> OnGet(int plantId = 0)
 		{
+			Referer = Request.Headers.Referer.FirstOrDefault() ?? "/";
+
 			await RefreshPalette();
 
 			if (plantId > 0) //Plant update is coming
