@@ -1,6 +1,7 @@
 ﻿@page "{plantId:int?}" //optional route parameter
 @using Plants.Models.Dto;
 @using System.Reflection;
+@using static BasePageModel;
 @model Plants.Pages.CreateUpdateModel
 @{
 	var enumViewTypes = (ViewType[])Enum.GetValues(typeof(ViewType));

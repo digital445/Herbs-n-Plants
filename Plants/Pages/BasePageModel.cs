@@ -26,6 +26,25 @@ namespace Plants.Pages
 			_plantsService = plantsService;
 		}
 
+		public static string NullBoolFilterToString(bool? b)
+		{
+			return b switch
+			{
+				true => "Yes",
+				false => "No",
+				_ => "Any"
+			};
+		}
+		public static string NullBoolPlantToString(bool? b)
+		{
+			return b switch
+			{
+				true => "Yes",
+				false => "No",
+				_ => "Unknown"
+			};
+		}
+
 		/// <summary>
 		/// Gets the palette value by retrieving it from either the page session or the API.
 		/// </summary>
@@ -70,5 +89,6 @@ namespace Plants.Pages
             TempData["ResultMessages"] = firstMessage + Environment.NewLine + messagesString;
             TempData["Success"] = wasSuccess;
         }
-    }
+
+	}
 }
