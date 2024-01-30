@@ -10,17 +10,14 @@
 <div class="container mt-5">
 	<div class="card">
 		<div class="card-header" id="filterHeader">
-			<div class="row">
+			<div class="row justify-content-between">
 				<div class="col col-auto">
 					<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterContent">
 						Filter
 					</button>
 				</div>
 				<div class="col col-auto">
-					<form method="get">
-						<input type="hidden" name="reset" value="true" />
-						<button class="btn btn-link" type="submit">Reset</button>
-					</form>
+					<a class="btn btn-success" href="/CreateUpdate">New Plant</a>
 				</div>
 			</div>
 		</div>
@@ -40,7 +37,7 @@
 						<div class="col-2 d-flex align-items-center">
 							Flower Color
 						</div>
-						<div class="col-4">
+						<div class="col-5">
 							<div class="card p-2 bg-light">
 								<div class="color-palette">
 									<input type="radio" id="default" asp-for=Filter.FlowerColorCode value="-1">
@@ -85,6 +82,13 @@
 						</div>
 					</div>
 				</form>
+				<div class="row" @(Model.Filter.IsApplied ? "" : "hidden")>
+					<form method="get">
+						<input type="hidden" name="reset" value="true" />
+						<button class="btn btn-link" type="submit">Reset</button>
+					</form>
+				</div>
+
 			</div>
 		</div>
 	</div>
