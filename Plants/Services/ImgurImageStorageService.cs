@@ -16,8 +16,13 @@ namespace Plants.Services
 			IHttpClientFactory httpClientFactory) : base(httpClientFactory)
 		{
 			ImgurAPIBaseUrl = configuration.GetValue<string>("Services:ImgurAPI:BaseUrl") ?? "";
+#if DEBUG
+			ImgurAPIAccessToken = Environment.GetEnvironmentVariable("ImgurAPIAccessToken") ?? "";
+			ImgurAPIAlbumHash = Environment.GetEnvironmentVariable("ImgurAPIAlbumHash") ?? "";
+#else
 			ImgurAPIAccessToken = configuration.GetValue<string>("Services:ImgurAPI:AccessToken") ?? "";
 			ImgurAPIAlbumHash = configuration.GetValue<string>("Services:ImgurAPI:AlbumHash") ?? "";
+#endif
 		}
 
 		public async Task<T?> UploadImageAsync<T>(IFormFile file)

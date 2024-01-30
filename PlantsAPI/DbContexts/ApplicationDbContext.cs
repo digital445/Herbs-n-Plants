@@ -13,8 +13,8 @@ namespace Services.PlantsAPI.DbContexts
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
 		{
 			//!!!debug
-			//Database.EnsureDeleted();
-			//Database.EnsureCreated();
+//			Database.EnsureDeleted();
+//			Database.EnsureCreated();
 
 		}
 

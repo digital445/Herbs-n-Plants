@@ -17,7 +17,11 @@ namespace Plants.Services
             IHttpClientFactory httpClientFactory) : base(httpClientFactory)
         {
             PlantsAPIBaseUrl = configuration.GetValue<string>("Services:PlantsAPI:BaseUrl") ?? "";
-			PlantsAPIAccessToken = configuration.GetValue<string>("Services:PlantsAPI:AccessToken") ?? "";
+#if DEBUG
+            PlantsAPIAccessToken = Environment.GetEnvironmentVariable("PlantsAPIAccessToken") ?? "";
+#else
+            PlantsAPIAccessToken = configuration.GetValue<string>("Services:PlantsAPI:AccessToken") ?? "";
+#endif
 		}
 
 		public async Task<T?> CreateUpdateAsync<T>(PlantDto plantDto)

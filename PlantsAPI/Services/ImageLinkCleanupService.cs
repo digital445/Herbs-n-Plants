@@ -8,8 +8,6 @@ namespace Services.PlantsAPI.Services
 {
 	public class ImageLinkCleanupService : BackgroundService
 	{
-		private const string Token = "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39";
-
 		private readonly IServiceScopeFactory _serviceScopeFactory;
 
 		public ImageLinkCleanupService(IServiceScopeFactory serviceScopeFactory)
@@ -64,7 +62,7 @@ namespace Services.PlantsAPI.Services
 			else
 			{
 				stopToken.ThrowIfCancellationRequested();
-				var deleteImgResponse = await imageService.DeleteImageAsync<ImgurResponseDto>(link.ImageServiceId, Token);
+				var deleteImgResponse = await imageService.DeleteImageAsync<ImgurResponseDto>(link.ImageServiceId);
 				if (deleteImgResponse?.success == true)
 					linksDeleted.Add(link.ImageId);
 			}

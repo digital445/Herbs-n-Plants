@@ -2,23 +2,35 @@
 using Services.PlantsAPI.Services.IServices;
 using Services.PlantsAPI.Models.Dto;
 using static Services.PlantsAPI.StaticDetails;
+using Microsoft.Extensions.Configuration;
 
 namespace Services.PlantsAPI.Services
 {
 	public class ImgurImageStorageService : BaseService, IImageStorageService
 	{
-		private const string albumHash = "piwTiWk";
-		public ImgurImageStorageService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+		private readonly string ImgurAPIBaseUrl;
+		private readonly string ImgurAPIAccessToken;
+
+		public ImgurImageStorageService(
+			IConfiguration configuration, 
+			IHttpClientFactory httpClientFactory) : base(httpClientFactory)
 		{
+			ImgurAPIBaseUrl = configuration.GetValue<string>("Services:ImgurAPI:BaseUrl") ?? "";
+#if DEBUG
+			ImgurAPIAccessToken = Environment.GetEnvironmentVariable("ImgurAPIAccessToken") ?? "";
+#else
+			ImgurAPIAccessToken = configuration.GetValue<string>("Services:ImgurAPI:AccessToken") ?? "";
+#endif
+
 		}
 
-		public async Task<T?> DeleteImageAsync<T>(string imageServiceId, string token)
+		public async Task<T?> DeleteImageAsync<T>(string imageServiceId)
 		{
 			return await SendAsync<T?>(new ApiRequestDto
 			{
 				ApiType = ApiType.DELETE,
-				Url = $"https://api.imgur.com/3/image/{imageServiceId}",
-				AccessToken = token
+				Url = ImgurAPIBaseUrl + $"/image/{imageServiceId}",
+				AccessToken = ImgurAPIAccessToken
 			});
 		}
 	}

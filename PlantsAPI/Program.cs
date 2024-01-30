@@ -10,7 +10,14 @@ using Services.PlantsAPI.Services.IServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+string identityServerBaseUrl = builder.Configuration.GetValue<string>("Services:IdentityServer:BaseUrl") ?? "";
+#if DEBUG
+string postgreSQLConnectionString = Environment.GetEnvironmentVariable("PostgreSQLConnectionString") ?? "";
+#else
+string postgreSQLConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+#endif
+
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(postgreSQLConnectionString));
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -23,7 +30,7 @@ builder.Services.AddControllers();
 builder.Services.AddAuthentication("Bearer")
 	.AddJwtBearer("Bearer", options =>
 	{
-		options.Authority = builder.Configuration.GetValue<string>("IdentityServer:Authority"); //gets an identity server URL
+		options.Authority = identityServerBaseUrl;
 		options.TokenValidationParameters = new TokenValidationParameters
 		{
 			ValidateAudience = false
