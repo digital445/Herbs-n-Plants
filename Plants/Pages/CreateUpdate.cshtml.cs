@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Plants.Services.IServices;
 using Plants.Models.Dto;
 using Plants.Models.Dto.Imgur;
-using static Plants.StaticDetails;
+using static Plants.Enumerations;
 using System.Collections.Concurrent;
 
 namespace Plants.Pages

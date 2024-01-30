@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using static Plants.StaticDetails;
+using static Plants.Enumerations;
 
 namespace Plants.Models.Dto
 {

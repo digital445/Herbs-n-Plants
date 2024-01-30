@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using Plants.Services.IServices;
 using Plants.Models.Dto;
-using static Plants.StaticDetails;
+using static Plants.Enumerations;
 
 namespace Plants.Services
 {

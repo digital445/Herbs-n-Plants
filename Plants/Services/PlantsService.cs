@@ -3,7 +3,7 @@ using Plants.Models.Dto;
 using Plants.Services.IServices;
 using System.Reflection;
 using System.Web;
-using static Plants.StaticDetails;
+using static Plants.Enumerations;
 
 namespace Plants.Services
 {

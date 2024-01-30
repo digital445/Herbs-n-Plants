@@ -41,9 +41,9 @@ namespace Plants.Services
 				HttpResponseMessage? apiResponse = null;
 				message.Method = apiRequest.ApiType switch
 				{
-					StaticDetails.ApiType.POST => HttpMethod.Post,
-					StaticDetails.ApiType.PUT => HttpMethod.Put,
-					StaticDetails.ApiType.DELETE => HttpMethod.Delete,
+					Enumerations.ApiType.POST => HttpMethod.Post,
+					Enumerations.ApiType.PUT => HttpMethod.Put,
+					Enumerations.ApiType.DELETE => HttpMethod.Delete,
 					_ => HttpMethod.Get
 				};
 
