@@ -99,39 +99,39 @@
 		{
 			foreach (var plant in Model.RequestedPlants)
 			{
-				if (plant?.Names != null)
-				{
-					<div class="col-4 ">
-						<div class="p-0 my-3 border">
-							<div class="card">
-								<img src="@plant.ImageLinks?.FirstOrDefault()?.ImageUrl" class="card-img-top fixed-card-img-top">
-								<div class="card-header">
-									@plant.ImageLinks.Count() Images
-								</div>
+				var imageToDisplayUrl = plant.ImageLinks.FirstOrDefault(il => il.ViewType == ViewType.Flower)?.ImageUrl
+					?? plant.ImageLinks.FirstOrDefault()?.ImageUrl;
 
-								<div class="card-body">
-									@foreach (var pn in plant!.Names.OrderBy(pn => pn.Language))
-									{
-										<h3 class="card-title text-success">@pn.Name</h3>
-									}
-									<div class="row">
-										<div class="col">
-											<p class="card-text">
-												Poisonous:	@NullBoolPlantToString(plant.Poisonous)<br>
-												For herbal tea: @NullBoolPlantToString(plant.ForHerbalTea)<br>
-												Picking is prohibited: @NullBoolPlantToString(plant.PickingProhibited)
-											</p>
-										</div>
-										<div class="col-3 d-flex flex-column">
-											<a class="btn btn-primary mt-auto mb-1" href=@(Model.NotAuthorized ? $"/Details/{plant.PlantId}" : $"/CreateUpdate/{plant.PlantId}")>Details</a>
-											<a class="btn btn-danger mt-auto" href=@($"/Delete/{plant.PlantId}") @(Model.NotAuthorized ? "hidden" : "") onclick="return confirmDelete();">Delete</a>
-										</div>
+				<div class="col-4 ">
+					<div class="p-0 my-3 border">
+						<div class="card">
+							<img src="@imageToDisplayUrl" class="card-img-top fixed-card-img-top">
+							<div class="card-header">
+								@plant.ImageLinks.Count() Images
+							</div>
+
+							<div class="card-body">
+								@foreach (var pn in plant!.Names.OrderBy(pn => pn.Language))
+								{
+									<h3 class="card-title text-success">@pn.Name</h3>
+								}
+								<div class="row">
+									<div class="col">
+										<p class="card-text">
+											Poisonous:	@NullBoolPlantToString(plant.Poisonous)<br>
+											For herbal tea: @NullBoolPlantToString(plant.ForHerbalTea)<br>
+											Picking is prohibited: @NullBoolPlantToString(plant.PickingProhibited)
+										</p>
+									</div>
+									<div class="col-3 d-flex flex-column">
+										<a class="btn btn-primary mt-auto mb-1" href=@(Model.NotAuthorized ? $"/Details/{plant.PlantId}" : $"/CreateUpdate/{plant.PlantId}")>Details</a>
+										<a class="btn btn-danger mt-auto" href=@($"/Delete/{plant.PlantId}") @(Model.NotAuthorized ? "hidden" : "") onclick="return confirmDelete();">Delete</a>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-				}
+				</div>
 			}
 		}
 	</div>
