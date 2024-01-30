@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using Services.PlantsAPI.Services.IServices;
 using Services.PlantsAPI.Models.Dto;
-using static Services.PlantsAPI.StaticDetails;
+using static Services.PlantsAPI.Enumerations;
 using Microsoft.Extensions.Configuration;
 
 namespace Services.PlantsAPI.Services

@@ -1,6 +1,6 @@
 ﻿namespace Services.PlantsAPI
 {
-	public static class StaticDetails
+	public static class Enumerations
 	{
 		public enum ApiType
 		{

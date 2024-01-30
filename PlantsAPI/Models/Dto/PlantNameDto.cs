@@ -1,4 +1,4 @@
-﻿using static Services.PlantsAPI.StaticDetails;
+﻿using static Services.PlantsAPI.Enumerations;
 
 namespace Services.PlantsAPI.Models.Dto
 {
