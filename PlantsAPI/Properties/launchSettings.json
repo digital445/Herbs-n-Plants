@@ -17,7 +17,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ImgurAPIAccessToken": "ef8ced08edc102e17d8fcb6abcab2b7342ea6b39",
-        "PostgreSQLConnectionString": "Host=localhost;Database=Plants2;Username=postgres;Password=qazsedc"
+        "PostgreSQLConnectionString": "Host=localhost;Database=Plants;Username=postgres;Password=QaZsEdCXsw8"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7166;http://localhost:5118"

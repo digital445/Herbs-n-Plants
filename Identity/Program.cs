@@ -7,10 +7,16 @@ using Services.Identity.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#if DEBUG
+string postgreSQLConnectionString = Environment.GetEnvironmentVariable("PostgreSQLConnectionString") ?? "";
+#else
+string postgreSQLConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+#endif
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(optionsBuilder =>
-	optionsBuilder.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+	optionsBuilder.UseNpgsql(postgreSQLConnectionString));
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 	.AddEntityFrameworkStores<ApplicationDbContext>()
 	.AddDefaultTokenProviders();
